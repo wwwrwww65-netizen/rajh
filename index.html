@@ -704,6 +704,19 @@
             }
         };
 
+        // وظيفة لإيقاف وضع التفكير فوراً عند الإدخال أو التراجع السريع
+        function stopThinkingMode() {
+            if (thinkingInterval) {
+                clearInterval(thinkingInterval);
+                thinkingInterval = null;
+            }
+            if (thinkingTimeout) {
+                clearTimeout(thinkingTimeout);
+                thinkingTimeout = null;
+            }
+            isThinkingMode = false;
+        }
+
         // عرض وتحديث التوقعات على الواجهة (يدعم وضع التفكير الهجين والأنيميشن)
         function calculateAndDisplayPredictions(forcedData = null) {
             // الحصول على احتمالات الدمج الهجين (الذكاء الاصطناعي + الأنماط الإحصائية)
@@ -848,7 +861,8 @@
 
         // إضافة فاكهة جديدة
         async function addFruitToHistory(fruit) {
-            if (isThinkingMode) return; // حماية ضد الإدخال المتكرر السريع أثناء فترة التحليل والأنيميشن
+            // إيقاف وضع التفكير فوراً لتمكين الإدخال الفوري والحر دون تأخير
+            stopThinkingMode();
             sounds.tap();
 
             // 1. استخراج السياق السابق (آخر 4 فواكه) قبل إضافة النتيجة الجديدة لتدريب الذكاء الاصطناعي عليها
@@ -879,12 +893,14 @@
             // 5. تحديث الواجهات
             updateHistoryUI();
 
-            // 6. تشغيل تأثير التفكير والوميض والأصوات التفاعلية لكشف التوقع القادم للدورة الجديدة
-            triggerThinkingAnimation();
+            // 6. عرض النسب المحدثة فوراً لسرعة الإدخال والتراجع دون أي حظر أو انتظار
+            calculateAndDisplayPredictions();
         }
 
         // تراجع عن آخر عملية إدخال
         function undoLastInput() {
+            // إيقاف وضع التفكير فوراً لتمكين التراجع الفوري دون انتظار
+            stopThinkingMode();
             if (history.length === 0) return;
             sounds.undo();
 
@@ -961,6 +977,9 @@
 
                     // تحويل لون النص الداخلي للأخضر لتفاعل أجمل
                     countdownText.className = "text-2xl font-black tracking-tight font-mono text-emerald-400 transition-colors duration-300";
+
+                    // تشغيل أنيميشن التفكير والوميض الإبداعي كشكل جمالي في بداية كل دورة جديدة
+                    triggerThinkingAnimation();
                 }
             } else {
                 // وقت النتيجة وتصفير العجلة (أحمر)
@@ -1040,6 +1059,7 @@
         async function clearAllDatabase() {
             sounds.undo();
             if (confirm("هل أنت متأكد من مسح كافة التعديلات والعودة لقاعدة البيانات الأصلية (46 دورة) وتصفير السجل الحالي؟")) {
+                stopThinkingMode();
                 allRounds = [...DEFAULT_DATASET];
                 history = [];
                 saveData();
@@ -1075,6 +1095,7 @@
         function resetCurrentHistory() {
             sounds.clickBtn();
             if (confirm("هل أنت متأكد من تصفير سجل آخر 10 دورات الحالي فقط؟ (لن يؤثر هذا على ذاكرة التحليل العميقة)")) {
+                stopThinkingMode();
                 history = [];
                 updateHistoryUI();
                 calculateAndDisplayPredictions();
