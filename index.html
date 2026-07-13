@@ -317,10 +317,11 @@
         const DEFAULT_DATASET = [...REFERENCE_DATASET];
 
         function getPredictionDataset() {
-            if (allRounds.length >= REFERENCE_DATASET.length) {
-                return allRounds;
+            const actualRoundsFruits = allRounds.map(r => (typeof r === 'string') ? r : r["الفاكهة_الفعلية"]);
+            if (actualRoundsFruits.length >= REFERENCE_DATASET.length) {
+                return actualRoundsFruits;
             } else {
-                return REFERENCE_DATASET.concat(allRounds);
+                return REFERENCE_DATASET.concat(actualRoundsFruits);
             }
         }
 
@@ -492,8 +493,8 @@
             }
         }
 
-        // التدريب التراكمي السريع والمستمر (Incremental Re-training)
-        async function trainOnNewSample(inputSeq, targetFruit) {
+        // التدريب التراكمي السريع والمستمر (Incremental Re-training) مع دعم التعلم من الأخطاء
+        async function trainOnNewSample(inputSeq, targetFruit, isError = false) {
             if (!tfModel || isModelTraining) return;
             isModelTraining = true;
             try {
@@ -503,15 +504,16 @@
                 const tensorX = tf.tensor2d(x);
                 const tensorY = tf.tensor2d(y);
 
-                // تدريب سريع ومكثف على العينة الجديدة ليتعلم منها مباشرة وبسرعة فائقة (5 حقب)
+                // إذا كانت النتيجة خاطئة، نقوم بتدريب مكثف جداً (25 حقبة) ليتعلم النموذج النمط الجديد ويتجنب الخطأ تكراراً
+                const epochsCount = isError ? 25 : 5;
                 await tfModel.fit(tensorX, tensorY, {
-                    epochs: 5,
+                    epochs: epochsCount,
                     verbose: 0
                 });
 
                 tensorX.dispose();
                 tensorY.dispose();
-                console.log("تم التدريب التراكمي على العينة الجديدة بنجاح!");
+                console.log(`تم التدريب التراكمي بنجاح! عدد الحقب: ${epochsCount}`);
             } catch (e) {
                 console.warn("خطأ في التدريب التراكمي:", e);
             } finally {
@@ -561,8 +563,29 @@
             const storedRounds = localStorage.getItem('fortune_all_rounds');
             if (storedRounds) {
                 allRounds = JSON.parse(storedRounds);
+                // ترحيل البيانات القديمة تلقائياً إلى بنية الكائنات الجديدة لضمان التوافق التام
+                let migrated = false;
+                allRounds = allRounds.map(r => {
+                    if (typeof r === 'string') {
+                        migrated = true;
+                        return {
+                            "الفاكهة_الفعلية": r,
+                            "الفاكهة_المتوقعة": r,
+                            "النتيجة": "صحيحة"
+                        };
+                    }
+                    return r;
+                });
+                if (migrated) {
+                    saveData();
+                }
             } else {
-                allRounds = [...DEFAULT_DATASET];
+                // ترحيل البيانات المرجعية الـ 88 الافتراضية ككائنات
+                allRounds = DEFAULT_DATASET.map(r => ({
+                    "الفاكهة_الفعلية": r,
+                    "الفاكهة_المتوقعة": r,
+                    "النتيجة": "صحيحة"
+                }));
                 localStorage.setItem('fortune_all_rounds', JSON.stringify(allRounds));
             }
 
@@ -732,6 +755,34 @@
             return { probs, strategy };
         }
 
+        // حساب مضاعفات الأداء التكيفية من سجل النتائج الصحيحة والخاطئة لتحسين التنبؤ ديناميكياً
+        function calculateFruitMultipliers() {
+            const multipliers = { 'تفاح': 1.0, 'موز': 1.0, 'بطيخ': 1.0, 'خوخ': 1.0, 'مانجو': 1.0 };
+
+            // دراسة آخر 40 دورة لتعلم الاتجاهات والأنماط القريبة من اللعب الفعلي والتكيف معها
+            const recentRounds = allRounds.slice(-40);
+
+            recentRounds.forEach(round => {
+                if (!round || typeof round !== 'object') return;
+
+                const actual = round["الفاكهة_الفعلية"];
+                const predicted = round["الفاكهة_المتوقعة"];
+                const result = round["النتيجة"];
+
+                if (result === "صحيحة") {
+                    // مكافأة التوقع الصحيح لترتفع فرصته مستقبلاً في حالة استمرار النمط
+                    multipliers[actual] = Math.min(multipliers[actual] + 0.10, 2.5);
+                } else if (result === "خاطئة") {
+                    // معاقبة وتخفيض وزن التوقع الذي أخطأ فيه الذكاء الاصطناعي لمنع تكرار نفس الخطأ
+                    multipliers[predicted] = Math.max(multipliers[predicted] - 0.15, 0.3);
+                    // مكافأة وترقية الفاكهة الصحيحة الفعلية التي كان ينبغي توقعها
+                    multipliers[actual] = Math.min(multipliers[actual] + 0.10, 2.5);
+                }
+            });
+
+            return multipliers;
+        }
+
         // دمج هجين فائق الذكاء بين نموذج TensorFlow.js والـ N-Gram الإحصائي
         function getHybridPredictionData() {
             // 1. حساب احتمالات الـ N-Gram
@@ -748,7 +799,10 @@
                 };
             }
 
-            // 3. معادلة الدمج الموزونة الذكية (50% للذكاء الاصطناعي و 50% للتحليل الإحصائي للأنماط)
+            // 3. حساب مضاعفات الأداء التكيفية من سجل النتائج الصحيحة والخاطئة
+            const fruitMultipliers = calculateFruitMultipliers();
+
+            // 4. معادلة الدمج الموزونة الذكية (50% للذكاء الاصطناعي و 50% للتحليل الإحصائي للأنماط) مع تطبيق المضاعفات التكيفية
             const hybridProbs = {};
             let sum = 0;
 
@@ -757,8 +811,13 @@
                 const pTf = tfProbs[fruit] || 0;
                 // دمج ذكي بنسبة النصف لكل منهما
                 const combined = (pNgram * 0.5) + (pTf * 0.5);
-                hybridProbs[fruit] = combined;
-                sum += combined;
+
+                // تطبيق المضاعف التكيفي التفاعلي للفاكهة بناءً على التعلم من الأخطاء والنجاحات
+                const multiplier = fruitMultipliers[fruit] || 1.0;
+                const weighted = combined * multiplier;
+
+                hybridProbs[fruit] = weighted;
+                sum += weighted;
             });
 
             // التأكد من أن مجموع النسب المئوية الكلي يساوي 100% تماماً لإظهارها بدقة للمستخدم
@@ -772,9 +831,12 @@
                 });
             }
 
+            // تضمين معلومات المضاعفات في نص الاستراتيجية للتوضيح الفائق للمستخدم
+            const multDetails = FRUITS_LIST.map(f => `${FRUIT_INFO[f].emoji}:${fruitMultipliers[f].toFixed(2)}`).join(' | ');
+
             return {
                 probs: hybridProbs,
-                strategy: `مدمج هجين 🚀 (50% ذكاء اصطناعي TF.js + 50% تحليل أنماط ${ngramData.strategy.split('مع')[0]})`
+                strategy: `مدمج هجين ذكي 🚀 (50% ذكاء اصطناعي TF.js + 50% تحليل أنماط ${ngramData.strategy.split('مع')[0]}) | معاملات التكيف: [ ${multDetails} ]`
             };
         }
 
@@ -954,7 +1016,7 @@
         }
 
         // إضافة فاكهة جديدة
-        async function addFruitToHistory(fruit, shouldAnimate = false) {
+        async function addFruitToHistory(fruit, predictedFruit, result, shouldAnimate = false) {
             // إيقاف وضع التفكير فوراً لتمكين الإدخال الفوري والحر دون تأخير
             stopThinkingMode();
             sounds.tap();
@@ -965,7 +1027,7 @@
                 inputSeq = history.slice(-4);
             } else {
                 const missingCount = 4 - history.length;
-                const defaultContext = allRounds.slice(-missingCount);
+                const defaultContext = getPredictionDataset().slice(-missingCount);
                 inputSeq = defaultContext.concat(history);
             }
 
@@ -976,12 +1038,16 @@
             history.push(fruit);
 
             // 3. تحديث قاعدة البيانات وحفظها محلياً
-            allRounds.push(fruit);
+            allRounds.push({
+                "الفاكهة_الفعلية": fruit,
+                "الفاكهة_المتوقعة": predictedFruit || fruit,
+                "النتيجة": result || "صحيحة"
+            });
             saveData();
 
             // 4. تدريب الشبكة العصبية تراكمياً (Incremental Re-training) في الخلفية على هذه العينة الجديدة فوراً
             if (inputSeq.length === 4) {
-                await trainOnNewSample(inputSeq, fruit);
+                await trainOnNewSample(inputSeq, fruit, result === "خاطئة");
             }
 
             // 5. تحديث الواجهات
@@ -1007,9 +1073,24 @@
 
             // حذفها أيضاً من قاعدة البيانات التراكمية
             if (allRounds.length > 0) {
-                const idx = allRounds.lastIndexOf(lastFruit);
+                let idx = -1;
+                for (let i = allRounds.length - 1; i >= 0; i--) {
+                    const r = allRounds[i];
+                    const f = (typeof r === 'string') ? r : r["الفاكهة_الفعلية"];
+                    if (f === lastFruit) {
+                        idx = i;
+                        break;
+                    }
+                }
                 if (idx !== -1) {
-                    allRounds.splice(idx, 1);
+                    const removedRound = allRounds.splice(idx, 1)[0];
+                    if (removedRound && typeof removedRound === 'object') {
+                        if (removedRound["النتيجة"] === "صحيحة" && statsCorrect > 0) {
+                            statsCorrect--;
+                        } else if (removedRound["النتيجة"] === "خاطئة" && statsIncorrect > 0) {
+                            statsIncorrect--;
+                        }
+                    }
                 }
             }
             saveData();
@@ -1217,9 +1298,16 @@
                     if (isIncorrectSelectionMode) {
                         statsIncorrect++;
                         setIncorrectSelectionMode(false);
-                        addFruitToHistory(fruit, true); // يشتغل الأنيميشن عند اختيار الصح بعد الخطأ
+                        addFruitToHistory(fruit, lastPredictedFruit, "خاطئة", true); // يشتغل الأنيميشن عند اختيار الصح بعد الخطأ
                     } else {
-                        addFruitToHistory(fruit, false); // لا يشتغل الأنيميشن عند الإدخال اليدوي المباشر الحر
+                        const isCorrect = (fruit === lastPredictedFruit);
+                        const resultStr = isCorrect ? "صحيحة" : "خاطئة";
+                        if (isCorrect) {
+                            statsCorrect++;
+                        } else {
+                            statsIncorrect++;
+                        }
+                        addFruitToHistory(fruit, lastPredictedFruit || fruit, resultStr, false); // لا يشتغل الأنيميشن عند الإدخال اليدوي المباشر الحر
                     }
                 });
             });
@@ -1233,7 +1321,7 @@
                 setIncorrectSelectionMode(false);
 
                 statsCorrect++;
-                addFruitToHistory(lastPredictedFruit, true); // يشتغل الأنيميشن عند التأكيد على أنها صحيحة
+                addFruitToHistory(lastPredictedFruit, lastPredictedFruit, "صحيحة", true); // يشتغل الأنيميشن عند التأكيد على أنها صحيحة
             });
 
             document.getElementById('confirmIncorrectBtn').addEventListener('click', () => {
