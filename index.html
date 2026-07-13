@@ -110,6 +110,23 @@
     <!-- المحتوى الرئيسي للموبايل -->
     <main class="w-full max-w-lg mx-auto px-4 py-2 flex-grow flex flex-col justify-between gap-4 overflow-y-auto">
 
+        <!-- شريط مؤشر حالة اللعبة (Volatility Index) -->
+        <section id="volatilityBanner" class="w-full bg-lightCard dark:bg-darkCard rounded-2xl p-4 border border-slate-200 dark:border-gray-800/80 shadow-sm theme-transition transition-all duration-300">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span id="volatilityBadge" class="flex h-4 w-4 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-4 w-4"></span>
+                    </span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-purple-400 font-bold uppercase tracking-wider">مؤشر حالة اللعبة (Volatility Index)</span>
+                        <span id="volatilityStatusText" class="text-xs font-black transition-colors duration-300">جاري تحميل المؤشر...</span>
+                    </div>
+                </div>
+                <div class="shrink-0 text-xl" id="volatilityEmoji">⏳</div>
+            </div>
+        </section>
+
         <!-- القسم الأول: منطقة التزامن والوقت (Timer & Sync) -->
         <section class="w-full bg-lightCard dark:bg-darkCard rounded-2xl p-4 border border-slate-200 dark:border-gray-800/80 shadow-neon-purple theme-transition">
             <div class="flex items-center justify-between gap-4">
@@ -567,6 +584,73 @@
             }
         }
 
+        // --- حساب وتحديث مؤشر حالة اللعبة (Volatility Index) ---
+        function updateVolatilityIndexUI() {
+            const volatilityBanner = document.getElementById('volatilityBanner');
+            const volatilityBadge = document.getElementById('volatilityBadge');
+            const volatilityStatusText = document.getElementById('volatilityStatusText');
+            const volatilityEmoji = document.getElementById('volatilityEmoji');
+
+            if (!volatilityBanner || !volatilityBadge || !volatilityStatusText || !volatilityEmoji) return;
+
+            // استخراج آخر 10 دورات من مصفوفة allRounds
+            const last10Rounds = allRounds.slice(-10);
+
+            // حالة الانتظار (أقل من 10 دورات)
+            if (allRounds.length < 10) {
+                // إزالة التوهجات والحدود السابقة
+                volatilityBanner.className = "w-full bg-lightCard dark:bg-darkCard rounded-2xl p-4 border border-yellow-500/30 dark:border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.2)] theme-transition transition-all duration-300";
+
+                // تحديث النبض واللون
+                const ping = volatilityBadge.querySelector('.animate-ping');
+                const dot = volatilityBadge.querySelector('.relative');
+                if (ping) ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-yellow-400";
+                if (dot) dot.className = "relative inline-flex rounded-full h-4 w-4 bg-yellow-500";
+
+                volatilityStatusText.textContent = "جاري تحليل اللعبة... (أدخل المزيد من النتائج)";
+                volatilityStatusText.className = "text-xs font-black text-yellow-600 dark:text-yellow-400 transition-colors duration-300";
+                volatilityEmoji.textContent = "🟡";
+                return;
+            }
+
+            // فحص التكرار المتتالي في آخر 10 دورات
+            let hasConsecutiveRepeat = false;
+            for (let i = 1; i < last10Rounds.length; i++) {
+                const prev = typeof last10Rounds[i - 1] === 'string' ? last10Rounds[i - 1] : last10Rounds[i - 1]["الفاكهة_الفعلية"];
+                const curr = typeof last10Rounds[i] === 'string' ? last10Rounds[i] : last10Rounds[i]["الفاكهة_الفعلية"];
+                if (prev === curr) {
+                    hasConsecutiveRepeat = true;
+                    break;
+                }
+            }
+
+            if (hasConsecutiveRepeat) {
+                // الوضع الأخضر (Safe to Play)
+                volatilityBanner.className = "w-full bg-lightCard dark:bg-darkCard rounded-2xl p-4 border border-emerald-500/40 dark:border-emerald-500/20 shadow-neon-emerald theme-transition transition-all duration-300";
+
+                const ping = volatilityBadge.querySelector('.animate-ping');
+                const dot = volatilityBadge.querySelector('.relative');
+                if (ping) ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-400";
+                if (dot) dot.className = "relative inline-flex rounded-full h-4 w-4 bg-emerald-500";
+
+                volatilityStatusText.textContent = "وضع الزخم: اللعبة مستقرة - التوقعات موثوقة (يمكنك الرهان)";
+                volatilityStatusText.className = "text-xs font-black text-emerald-600 dark:text-emerald-400 transition-colors duration-300";
+                volatilityEmoji.textContent = "🟢";
+            } else {
+                // الوضع الأحمر (High Volatility)
+                volatilityBanner.className = "w-full bg-lightCard dark:bg-darkCard rounded-2xl p-4 border border-rose-500/40 dark:border-rose-500/20 shadow-neon-rose theme-transition transition-all duration-300";
+
+                const ping = volatilityBadge.querySelector('.animate-ping');
+                const dot = volatilityBadge.querySelector('.relative');
+                if (ping) ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-rose-400";
+                if (dot) dot.className = "relative inline-flex rounded-full h-4 w-4 bg-rose-500";
+
+                volatilityStatusText.textContent = "وضع الخطر: تقلب عشوائي شديد - توقف عن الرهان الآن!";
+                volatilityStatusText.className = "text-xs font-black text-rose-600 dark:text-rose-400 transition-colors duration-300";
+                volatilityEmoji.textContent = "🔴";
+            }
+        }
+
         // --- تحميل وحفظ البيانات ---
         async function loadData() {
             // محاولة التحميل من LocalStorage
@@ -632,6 +716,7 @@
             await buildAndTrainModel();
 
             calculateAndDisplayPredictions();
+            updateVolatilityIndexUI();
         }
 
         function saveData() {
@@ -640,6 +725,7 @@
             localStorage.setItem('fortune_stats_incorrect', statsIncorrect);
             updateDatabaseStatsUI();
             updateAccuracyUI();
+            updateVolatilityIndexUI();
         }
 
         function updateAccuracyUI() {
@@ -1185,6 +1271,7 @@
 
             updateHistoryUI();
             calculateAndDisplayPredictions();
+            updateVolatilityIndexUI();
         }
 
 
@@ -1358,6 +1445,7 @@
 
                 statusPill.textContent = "العداد جاهز للبدء 🟢";
                 statusPill.className = "px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-500/20 text-center text-xs font-bold transition-all duration-300";
+                updateVolatilityIndexUI();
             }
         }
 
