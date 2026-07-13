@@ -123,7 +123,7 @@
                     </svg>
                     <!-- النص بالداخل -->
                     <div class="absolute flex flex-col items-center justify-center">
-                        <span id="countdownText" class="text-2xl font-black tracking-tight font-mono text-slate-800 dark:text-white">24.8</span>
+                        <span id="countdownText" class="text-2xl font-black tracking-tight font-mono text-slate-800 dark:text-white">25.0</span>
                         <span class="text-[9px] text-slate-500 dark:text-gray-400">ثانية</span>
                     </div>
                 </div>
@@ -184,6 +184,35 @@
             <!-- معلومة إضافية عن نوع التوقع المستخدم حالياً -->
             <div id="predictionStrategyText" class="text-center text-[10px] text-slate-400 dark:text-gray-500 mt-3 font-medium">
                 استراتيجية التحليل: النسبة التاريخية العامة لعدم وجود نتائج كافية
+            </div>
+
+            <!-- لوحة تأكيد التوقعات والنسب وإحصائيات الدقة -->
+            <div class="mt-4 border-t border-slate-200/60 dark:border-gray-800/60 pt-3 flex flex-col gap-3">
+                <!-- إحصائيات الدقة -->
+                <div class="flex justify-between items-center text-xs text-slate-500 dark:text-gray-400 bg-slate-100/40 dark:bg-black/15 p-2 rounded-xl">
+                    <span class="flex items-center gap-1">
+                        <span>📊 دقة التوقعات الحالية:</span>
+                        <span id="accuracyPercentage" class="font-bold text-emerald-500 dark:text-emerald-400 text-sm font-mono">0%</span>
+                    </span>
+                    <span class="text-[10px]">
+                        (صحيحة: <span id="correctCount" class="font-bold text-slate-700 dark:text-white font-mono">0</span> | خاطئة: <span id="incorrectCount" class="font-bold text-slate-700 dark:text-white font-mono">0</span>)
+                    </span>
+                </div>
+
+                <!-- أزرار التأكيد -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="confirmCorrectBtn" class="py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-white shadow-md shadow-emerald-500/10 transition-all duration-100 flex items-center justify-center gap-1.5">
+                        <span>صحيحة ✅</span>
+                    </button>
+                    <button id="confirmIncorrectBtn" class="py-2.5 px-4 rounded-xl font-bold text-xs bg-rose-500 hover:bg-rose-400 active:scale-95 text-white shadow-md shadow-rose-500/10 transition-all duration-100 flex items-center justify-center gap-1.5">
+                        <span>خاطئة ❌</span>
+                    </button>
+                </div>
+
+                <!-- رسالة إرشادية عند اختيار "توقع خاطئ" -->
+                <div id="incorrectPromptBanner" class="hidden text-center text-xs font-bold text-rose-500 dark:text-rose-400 animate-pulse bg-rose-500/10 border border-rose-500/20 py-2 rounded-xl">
+                    الرجاء الضغط على الفاكهة الصحيحة الفعلية من لوحة الإدخال السريع بالأسفل 👇
+                </div>
             </div>
         </section>
 
@@ -273,13 +302,27 @@
     <!-- منطق البرمجة المدمج فائق الاستجابة -->
     <script>
         // --- البيانات والتهيئة ---
-        const DEFAULT_DATASET = [
-            'بطيخ', 'موز', 'موز', 'بطيخ', 'تفاح', 'بطيخ', 'مانجو', 'مانجو', 'خوخ', 'موز',
-            'بطيخ', 'بطيخ', 'مانجو', 'خوخ', 'مانجو', 'خوخ', 'تفاح', 'خوخ', 'موز', 'موز',
-            'بطيخ', 'موز', 'مانجو', 'تفاح', 'تفاح', 'خوخ', 'تفاح', 'مانجو', 'تفاح', 'تفاح',
-            'موز', 'بطيخ', 'بطيخ', 'موز', 'مانجو', 'مانجو', 'بطيخ', 'خوخ', 'خوخ', 'تفاح',
-            'موز', 'خوخ', 'مانجو', 'موز', 'موز', 'تفاح'
+        const REFERENCE_DATASET = [
+            "بطيخ", "موز", "موز", "بطيخ", "تفاح", "بطيخ", "مانجو", "مانجو", "خوخ", "موز",
+            "بطيخ", "بطيخ", "مانجو", "خوخ", "مانجو", "خوخ", "تفاح", "خوخ", "موز", "موز",
+            "بطيخ", "موز", "مانجو", "تفاح", "تفاح", "خوخ", "تفاح", "مانجو", "تفاح", "تفاح",
+            "موز", "بطيخ", "بطيخ", "موز", "مانجو", "مانجو", "بطيخ", "خوخ", "خوخ", "تفاح",
+            "موز", "خوخ", "مانجو", "موز", "موز", "تفاح", "تفاح", "مانجو", "مانجو", "تفاح",
+            "تفاح", "مانجو", "بطيخ", "مانجو", "موز", "موز", "تفاح", "تفاح", "خوخ", "مانجو",
+            "بطيخ", "موز", "موز", "تفاح", "تفاح", "بطيخ", "بطيخ", "موز", "موز", "موز",
+            "تفاح", "مانجو", "خوخ", "موز", "مانجو", "خوخ", "تفاح", "موز", "موز", "تفاح",
+            "مانجو", "مانجو", "تفاح", "مانجو", "خوخ", "خوخ", "خوخ", "بطيخ"
         ];
+
+        const DEFAULT_DATASET = [...REFERENCE_DATASET];
+
+        function getPredictionDataset() {
+            if (allRounds.length >= REFERENCE_DATASET.length) {
+                return allRounds;
+            } else {
+                return REFERENCE_DATASET.concat(allRounds);
+            }
+        }
 
         const FRUIT_INFO = {
             'بطيخ': { emoji: '🍉', color: 'text-emerald-400', barBg: 'bg-emerald-500/20', fillBg: 'bg-emerald-500', glow: 'shadow-neon-emerald' },
@@ -299,6 +342,12 @@
         let allRounds = [];
         let history = [];
         let soundEnabled = true;
+
+        // إحصائيات الدقة والتأكيد
+        let statsCorrect = 0;
+        let statsIncorrect = 0;
+        let isIncorrectSelectionMode = false;
+        let lastPredictedFruit = null; // للاحتفاظ بآخر توقع تم تأكيده أو تعديله
 
         // تهيئة الصوت (Web Audio API) لتجنب الاعتماد على ملفات خارجية
         let audioCtx = null;
@@ -376,9 +425,10 @@
                 const ys = [];
 
                 // استخراج العينات من قاعدة البيانات التاريخية المتوفرة بالكامل
-                for (let i = 0; i <= allRounds.length - windowSize - 1; i++) {
-                    const inputSeq = allRounds.slice(i, i + windowSize);
-                    const targetFruit = allRounds[i + windowSize];
+                const dataset = getPredictionDataset();
+                for (let i = 0; i <= dataset.length - windowSize - 1; i++) {
+                    const inputSeq = dataset.slice(i, i + windowSize);
+                    const targetFruit = dataset[i + windowSize];
 
                     xs.push(sequenceToFeatures(inputSeq));
                     ys.push(fruitToOneHot(targetFruit));
@@ -480,7 +530,7 @@
                 } else {
                     // في حال عدم توفر سياق كامل في السجل الحالي، نأخذ آخر فواكه من قاعدة البيانات العامة كدعم
                     const missingCount = 4 - history.length;
-                    const defaultContext = allRounds.slice(-missingCount);
+                    const defaultContext = getPredictionDataset().slice(-missingCount);
                     contextSeq = defaultContext.concat(history);
                 }
 
@@ -516,6 +566,13 @@
                 localStorage.setItem('fortune_all_rounds', JSON.stringify(allRounds));
             }
 
+            // تحميل إحصائيات التأكيد
+            const storedCorrect = localStorage.getItem('fortune_stats_correct');
+            const storedIncorrect = localStorage.getItem('fortune_stats_incorrect');
+            if (storedCorrect !== null) statsCorrect = parseInt(storedCorrect, 10);
+            if (storedIncorrect !== null) statsIncorrect = parseInt(storedIncorrect, 10);
+            updateAccuracyUI();
+
             // تحميل حالة الصوت
             const storedSound = localStorage.getItem('fortune_sound_enabled');
             if (storedSound !== null) {
@@ -546,7 +603,27 @@
 
         function saveData() {
             localStorage.setItem('fortune_all_rounds', JSON.stringify(allRounds));
+            localStorage.setItem('fortune_stats_correct', statsCorrect);
+            localStorage.setItem('fortune_stats_incorrect', statsIncorrect);
             updateDatabaseStatsUI();
+            updateAccuracyUI();
+        }
+
+        function updateAccuracyUI() {
+            const total = statsCorrect + statsIncorrect;
+            const accuracyPercentage = document.getElementById('accuracyPercentage');
+            const correctCount = document.getElementById('correctCount');
+            const incorrectCount = document.getElementById('incorrectCount');
+
+            correctCount.textContent = statsCorrect;
+            incorrectCount.textContent = statsIncorrect;
+
+            if (total > 0) {
+                const percentage = ((statsCorrect / total) * 100).toFixed(0);
+                accuracyPercentage.textContent = `${percentage}%`;
+            } else {
+                accuracyPercentage.textContent = '0%';
+            }
         }
 
         function updateDatabaseStatsUI() {
@@ -558,8 +635,22 @@
             document.getElementById('userDbStats').textContent = addedCount >= 0 ? addedCount : 0;
         }
 
+        function setIncorrectSelectionMode(active) {
+            isIncorrectSelectionMode = active;
+            const banner = document.getElementById('incorrectPromptBanner');
+            const pad = document.getElementById('fastInputPad');
+            if (active) {
+                banner.classList.remove('hidden');
+                pad.classList.add('border-4', 'border-rose-500', 'rounded-2xl', 'shadow-neon-rose', 'p-1', 'scale-[1.02]');
+            } else {
+                banner.classList.add('hidden');
+                pad.classList.remove('border-4', 'border-rose-500', 'rounded-2xl', 'shadow-neon-rose', 'p-1', 'scale-[1.02]');
+            }
+        }
+
         // --- خوارزمية التوقع الإحصائي الذكي (N-Gram Matching) ---
         function getPredictionData() {
+            const dataset = getPredictionDataset();
             const n = history.length;
             let matchCount = 0;
             let freqs = { 'تفاح': 0, 'موز': 0, 'بطيخ': 0, 'خوخ': 0, 'مانجو': 0 };
@@ -576,9 +667,9 @@
             if (n >= 3) {
                 const target = history.slice(-3);
                 const matches = [];
-                for (let i = 0; i <= allRounds.length - 4; i++) {
-                    if (allRounds[i] === target[0] && allRounds[i+1] === target[1] && allRounds[i+2] === target[2]) {
-                        matches.push(allRounds[i+3]);
+                for (let i = 0; i <= dataset.length - 4; i++) {
+                    if (dataset[i] === target[0] && dataset[i+1] === target[1] && dataset[i+2] === target[2]) {
+                        matches.push(dataset[i+3]);
                     }
                 }
                 if (matches.length > 0) {
@@ -592,9 +683,9 @@
             if (matchCount === 0 && n >= 2) {
                 const target = history.slice(-2);
                 const matches = [];
-                for (let i = 0; i <= allRounds.length - 3; i++) {
-                    if (allRounds[i] === target[0] && allRounds[i+1] === target[1]) {
-                        matches.push(allRounds[i+2]);
+                for (let i = 0; i <= dataset.length - 3; i++) {
+                    if (dataset[i] === target[0] && dataset[i+1] === target[1]) {
+                        matches.push(dataset[i+2]);
                     }
                 }
                 if (matches.length > 0) {
@@ -608,9 +699,9 @@
             if (matchCount === 0 && n >= 1) {
                 const target = history.slice(-1);
                 const matches = [];
-                for (let i = 0; i <= allRounds.length - 2; i++) {
-                    if (allRounds[i] === target[0]) {
-                        matches.push(allRounds[i+1]);
+                for (let i = 0; i <= dataset.length - 2; i++) {
+                    if (dataset[i] === target[0]) {
+                        matches.push(dataset[i+1]);
                     }
                 }
                 if (matches.length > 0) {
@@ -622,10 +713,10 @@
 
             // 4. Fallback: النسبة التاريخية العامة لجميع عناصر قاعدة البيانات
             if (matchCount === 0) {
-                allRounds.forEach(fruit => {
+                dataset.forEach(fruit => {
                     if (freqs[fruit] !== undefined) freqs[fruit]++;
                 });
-                matchCount = allRounds.length;
+                matchCount = dataset.length;
                 strategy = "النسبة التاريخية العامة لعدم وجود نمط متطابق";
             }
 
@@ -734,6 +825,9 @@
                     maxFruit = f;
                 }
             });
+
+            // الاحتفاظ بأعلى فاكهة متوقعة
+            lastPredictedFruit = maxFruit;
 
             // بناء شبكة عرض الفواكه
             const grid = document.getElementById('predictionsGrid');
@@ -893,14 +987,15 @@
             // 5. تحديث الواجهات
             updateHistoryUI();
 
-            // 6. عرض النسب المحدثة فوراً لسرعة الإدخال والتراجع دون أي حظر أو انتظار
-            calculateAndDisplayPredictions();
+            // 6. تشغيل أنيميشن التفكير والوميض الإبداعي بدلاً من حساب وعرض التوقعات فوراً
+            triggerThinkingAnimation();
         }
 
         // تراجع عن آخر عملية إدخال
         function undoLastInput() {
             // إيقاف وضع التفكير فوراً لتمكين التراجع الفوري دون انتظار
             stopThinkingMode();
+            setIncorrectSelectionMode(false);
             if (history.length === 0) return;
             sounds.undo();
 
@@ -921,7 +1016,7 @@
 
 
         // --- محرك عداد الوقت والتزامن الفائق الدقة (Timer & Sync) ---
-        const CYCLE_DURATION = 24.86;
+        const CYCLE_DURATION = 25.00;
         const BETTING_DURATION = 17.00;
 
         let timerStartTime = null;
@@ -947,10 +1042,10 @@
             const currentCycleTime = elapsedSeconds % CYCLE_DURATION;
             const remainingTime = CYCLE_DURATION - currentCycleTime;
 
-            // تحديد الحالة: هل نحن في وقت الرهان (الـ 17 ثانية الأولى) أم وقت النتيجة (الـ 7.86 ثانية الأخيرة)؟
-            // للتبسيط: وقت الرهان من بداية الدورة (24.86 ثانية) تنازلياً حتى 7.86 ثانية متبقية.
-            // وقت النتيجة من 7.86 ثانية متبقية تنازلياً حتى 0.
-            const isBettingTime = remainingTime > (CYCLE_DURATION - BETTING_DURATION); // أي أعلى من 7.86
+            // تحديد الحالة: هل نحن في وقت الرهان (الـ 17 ثانية الأولى) أم وقت النتيجة (الـ 8 ثوانٍ الأخيرة)؟
+            // للتبسيط: وقت الرهان من بداية الدورة (25.00 ثانية) تنازلياً حتى 8.00 ثوان متبقية.
+            // وقت النتيجة من 8.00 ثوان متبقية تنازلياً حتى 0.
+            const isBettingTime = remainingTime > (CYCLE_DURATION - BETTING_DURATION); // أي أعلى من 8.00
 
             // تحديث نصوص وألوان الواجهة
             const countdownText = document.getElementById('countdownText');
@@ -977,9 +1072,6 @@
 
                     // تحويل لون النص الداخلي للأخضر لتفاعل أجمل
                     countdownText.className = "text-2xl font-black tracking-tight font-mono text-emerald-400 transition-colors duration-300";
-
-                    // تشغيل أنيميشن التفكير والوميض الإبداعي كشكل جمالي في بداية كل دورة جديدة
-                    triggerThinkingAnimation();
                 }
             } else {
                 // وقت النتيجة وتصفير العجلة (أحمر)
@@ -1058,14 +1150,18 @@
 
         async function clearAllDatabase() {
             sounds.undo();
-            if (confirm("هل أنت متأكد من مسح كافة التعديلات والعودة لقاعدة البيانات الأصلية (46 دورة) وتصفير السجل الحالي؟")) {
+            if (confirm("هل أنت متأكد من مسح كافة التعديلات وتصفير السجل الحالي ونسب التوقعات؟ (ستبقى قاعدة البيانات المرجعية الـ 88 دورة للتحليل)")) {
                 stopThinkingMode();
-                allRounds = [...DEFAULT_DATASET];
+                allRounds = [];
                 history = [];
+                statsCorrect = 0;
+                statsIncorrect = 0;
+                setIncorrectSelectionMode(false);
                 saveData();
                 updateHistoryUI();
+                updateAccuracyUI();
 
-                // إعادة تدريب النموذج من الصفر على البيانات الافتراضية
+                // إعادة تدريب النموذج من الصفر على البيانات المرجعية
                 await buildAndTrainModel();
 
                 calculateAndDisplayPredictions();
@@ -1082,7 +1178,7 @@
                 const statusPill = document.getElementById('statusPill');
                 const progressCircle = document.getElementById('timerProgressCircle');
 
-                countdownText.textContent = "24.8";
+                countdownText.textContent = "25.0";
                 countdownText.className = "text-2xl font-black tracking-tight font-mono text-slate-800 dark:text-white";
                 progressCircle.setAttribute('stroke-dashoffset', 0);
                 progressCircle.setAttribute('stroke', '#10b981');
@@ -1114,8 +1210,30 @@
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     const fruit = btn.getAttribute('data-fruit');
+                    if (isIncorrectSelectionMode) {
+                        statsIncorrect++;
+                        setIncorrectSelectionMode(false);
+                    }
                     addFruitToHistory(fruit);
                 });
+            });
+
+            // أزرار تأكيد التوقعات (صحيحة / خاطئة)
+            document.getElementById('confirmCorrectBtn').addEventListener('click', () => {
+                if (isThinkingMode) return; // منع التأكيد أثناء حركة التفكير
+                if (!lastPredictedFruit) return;
+
+                // إلغاء وضع التحديد غير الصحيح لو كان مفعلاً
+                setIncorrectSelectionMode(false);
+
+                statsCorrect++;
+                addFruitToHistory(lastPredictedFruit);
+            });
+
+            document.getElementById('confirmIncorrectBtn').addEventListener('click', () => {
+                if (isThinkingMode) return; // منع التحديد أثناء حركة التفكير
+                setIncorrectSelectionMode(!isIncorrectSelectionMode);
+                sounds.tap();
             });
 
             // زر المزامنة
