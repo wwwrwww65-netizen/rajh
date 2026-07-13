@@ -412,6 +412,8 @@
             return features;
         }
 
+        const MODEL_WINDOW_SIZE = 2; // التركيز على السلاسل القصيرة جداً (آخر دورتين) لتجنب التشتت
+
         // بناء نموذج TensorFlow.js وتدريبه من الصفر على قاعدة البيانات بالكامل
         async function buildAndTrainModel() {
             if (isModelTraining) return;
@@ -419,9 +421,9 @@
             console.log("بدء تهيئة وتدريب نموذج الشبكة العصبية...");
 
             try {
-                // إعداد البيانات: نافذة بحجم 4 فواكه كمدخلات (Input) لتوقع الفاكهة الـ 5 (Target)
-                const windowSize = 4;
-                const featuresCount = windowSize * FRUITS_LIST.length; // 4 * 5 = 20
+                // إعداد البيانات: نافذة بحجم MODEL_WINDOW_SIZE فواكه كمدخلات لتوقع الفاكهة التالية
+                const windowSize = MODEL_WINDOW_SIZE;
+                const featuresCount = windowSize * FRUITS_LIST.length; // 2 * 5 = 10
                 const xs = [];
                 const ys = [];
 
@@ -435,10 +437,10 @@
                     ys.push(fruitToOneHot(targetFruit));
                 }
 
-                // إذا لم يكن لدينا بيانات كافية (أمر نادر لأن الافتراضي 46 دورة)، سنقوم بالتوليد الوهمي البسيط لتجنب الأخطاء
+                // إذا لم يكن لدينا بيانات كافية، سنقوم بالتوليد الوهمي البسيط لتجنب الأخطاء
                 if (xs.length === 0) {
                     for (let k = 0; k < 5; k++) {
-                        const dummySeq = [FRUITS_LIST[0], FRUITS_LIST[1], FRUITS_LIST[2], FRUITS_LIST[3]];
+                        const dummySeq = [FRUITS_LIST[0], FRUITS_LIST[1]];
                         xs.push(sequenceToFeatures(dummySeq));
                         ys.push(fruitToOneHot(FRUITS_LIST[4]));
                     }
@@ -498,7 +500,14 @@
             if (!tfModel || isModelTraining) return;
             isModelTraining = true;
             try {
-                const x = [sequenceToFeatures(inputSeq)];
+                // التأكد من ضبط حجم المدخلات على الحجم المطلوب MODEL_WINDOW_SIZE
+                const trimmedSeq = inputSeq.slice(-MODEL_WINDOW_SIZE);
+                if (trimmedSeq.length < MODEL_WINDOW_SIZE) {
+                    isModelTraining = false;
+                    return;
+                }
+
+                const x = [sequenceToFeatures(trimmedSeq)];
                 const y = [fruitToOneHot(targetFruit)];
 
                 const tensorX = tf.tensor2d(x);
@@ -521,17 +530,18 @@
             }
         }
 
-        // الحصول على احتمالات التوقع من نموذج TensorFlow.js لآخر 4 فواكه في السجل
+        // الحصول على احتمالات التوقع من نموذج TensorFlow.js لآخر MODEL_WINDOW_SIZE فواكه في السجل
         function getTensorFlowPredictionProbs() {
             if (!tfModel) return null;
 
             try {
                 let contextSeq = [];
-                if (history.length >= 4) {
-                    contextSeq = history.slice(-4);
+                const windowSize = MODEL_WINDOW_SIZE;
+                if (history.length >= windowSize) {
+                    contextSeq = history.slice(-windowSize);
                 } else {
                     // في حال عدم توفر سياق كامل في السجل الحالي، نأخذ آخر فواكه من قاعدة البيانات العامة كدعم
-                    const missingCount = 4 - history.length;
+                    const missingCount = windowSize - history.length;
                     const defaultContext = getPredictionDataset().slice(-missingCount);
                     contextSeq = defaultContext.concat(history);
                 }
@@ -755,11 +765,31 @@
             return { probs, strategy };
         }
 
-        // حساب مضاعفات الأداء التكيفية من سجل النتائج الصحيحة والخاطئة لتحسين التنبؤ ديناميكياً
+        // حساب معدل التكرار (الحرارة الإحصائية) في آخر 15 دورة كعامل ثالث للتنبؤ بالاتجاهات
+        function getHotColdProbs() {
+            const dataset = getPredictionDataset();
+            const recent15 = dataset.slice(-15);
+
+            const counts = { 'تفاح': 0, 'موز': 0, 'بطيخ': 0, 'خوخ': 0, 'مانجو': 0 };
+            recent15.forEach(fruit => {
+                if (counts[fruit] !== undefined) {
+                    counts[fruit]++;
+                }
+            });
+
+            const total = recent15.length || 1;
+            const probs = {};
+            FRUITS_LIST.forEach(fruit => {
+                probs[fruit] = (counts[fruit] / total) * 100;
+            });
+            return probs;
+        }
+
+        // حساب مضاعفات الأداء التكيفية وسلسلة التكرار (Streak/Momentum Boost) ديناميكياً
         function calculateFruitMultipliers() {
             const multipliers = { 'تفاح': 1.0, 'موز': 1.0, 'بطيخ': 1.0, 'خوخ': 1.0, 'مانجو': 1.0 };
 
-            // دراسة آخر 40 دورة لتعلم الاتجاهات والأنماط القريبة من اللعب الفعلي والتكيف معها
+            // دراسة آخر 40 دورة للتكيف والتعلم من النجاحات والأخطاء
             const recentRounds = allRounds.slice(-40);
 
             recentRounds.forEach(round => {
@@ -770,49 +800,82 @@
                 const result = round["النتيجة"];
 
                 if (result === "صحيحة") {
-                    // مكافأة التوقع الصحيح لترتفع فرصته مستقبلاً في حالة استمرار النمط
-                    multipliers[actual] = Math.min(multipliers[actual] + 0.10, 2.5);
+                    // مكافأة التوقع الصحيح لترتفع فرصته مستقبلاً
+                    multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
                 } else if (result === "خاطئة") {
-                    // معاقبة وتخفيض وزن التوقع الذي أخطأ فيه الذكاء الاصطناعي لمنع تكرار نفس الخطأ
-                    multipliers[predicted] = Math.max(multipliers[predicted] - 0.15, 0.3);
-                    // مكافأة وترقية الفاكهة الصحيحة الفعلية التي كان ينبغي توقعها
-                    multipliers[actual] = Math.min(multipliers[actual] + 0.10, 2.5);
+                    // عقوبة طفيفة جداً لمنع الانهيار السريع في التوقعات (مراعاة للتكرار)
+                    multipliers[predicted] = Math.max(multipliers[predicted] - 0.05, 0.60);
+                    // مكافأة الفاكهة الصحيحة الفعلية لرفع مرتبتها
+                    multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
                 }
             });
+
+            // تطبيق "مضاعف الزخم والتكرار المتتالي" (Streak Multiplier)
+            if (history.length > 0) {
+                const lastFruit = history[history.length - 1];
+                let streakLength = 0;
+
+                // حساب طول السلسلة النشطة الحالية للفاكهة الأخيرة في السجل
+                for (let i = history.length - 1; i >= 0; i--) {
+                    if (history[i] === lastFruit) {
+                        streakLength++;
+                    } else {
+                        break;
+                    }
+                }
+
+                // رفع احتمالية تكرار الفاكهة التي ظهرت للتو مباشرة بناءً على طول السلسلة
+                // سلسلة طولها 1 تمنح زيادة قدرها +50%، سلسلة طولها 2 تمنح +100%، وسلسلة طولها 3+ تمنح +150%
+                let streakBoost = 1.0;
+                if (streakLength === 1) {
+                    streakBoost = 1.50;
+                } else if (streakLength === 2) {
+                    streakBoost = 2.00;
+                } else if (streakLength >= 3) {
+                    streakBoost = 2.50;
+                }
+
+                multipliers[lastFruit] *= streakBoost;
+            }
 
             return multipliers;
         }
 
-        // دمج هجين فائق الذكاء بين نموذج TensorFlow.js والـ N-Gram الإحصائي
+        // دمج هجين ثلاثي فائق المعايرة والذكاء بين نموذج TensorFlow.js والـ N-Gram والحرارة الإحصائية
         function getHybridPredictionData() {
             // 1. حساب احتمالات الـ N-Gram
             const ngramData = getPredictionData();
 
             // 2. حساب احتمالات TensorFlow.js
-            const tfProbs = getTensorFlowPredictionProbs();
-
-            // إذا لم يكن نموذج TensorFlow جاهزاً بعد لأي سبب، نعتمد على الـ N-Gram بالكامل
+            let tfProbs = getTensorFlowPredictionProbs();
+            let isTfFallback = false;
             if (!tfProbs) {
-                return {
-                    probs: ngramData.probs,
-                    strategy: `${ngramData.strategy} (انتظار تهيئة الذكاء الاصطناعي 🧠)`
-                };
+                isTfFallback = true;
+                tfProbs = {};
+                FRUITS_LIST.forEach(fruit => {
+                    tfProbs[fruit] = ngramData.probs[fruit] || 20.0;
+                });
             }
 
-            // 3. حساب مضاعفات الأداء التكيفية من سجل النتائج الصحيحة والخاطئة
+            // 3. حساب احتمالات الحرارة الإحصائية (آخر 15 دورة)
+            const hotColdProbs = getHotColdProbs();
+
+            // 4. حساب مضاعفات الأداء التكيفية وسلسلة التكرار
             const fruitMultipliers = calculateFruitMultipliers();
 
-            // 4. معادلة الدمج الموزونة الذكية (50% للذكاء الاصطناعي و 50% للتحليل الإحصائي للأنماط) مع تطبيق المضاعفات التكيفية
+            // 5. دمج ثلاثي موزون: 50% للذكاء الاصطناعي، 30% للـ N-Gram، و 20% للحرارة الإحصائية
             const hybridProbs = {};
             let sum = 0;
 
             FRUITS_LIST.forEach(fruit => {
                 const pNgram = ngramData.probs[fruit] || 0;
                 const pTf = tfProbs[fruit] || 0;
-                // دمج ذكي بنسبة النصف لكل منهما
-                const combined = (pNgram * 0.5) + (pTf * 0.5);
+                const pHotCold = hotColdProbs[fruit] || 0;
 
-                // تطبيق المضاعف التكيفي التفاعلي للفاكهة بناءً على التعلم من الأخطاء والنجاحات
+                // دمج موزون بدقة: 50% TF.js, 30% N-Gram, 20% Hot/Cold
+                const combined = (pTf * 0.50) + (pNgram * 0.30) + (pHotCold * 0.20);
+
+                // تطبيق المضاعف التكيفي والزخم التكراري
                 const multiplier = fruitMultipliers[fruit] || 1.0;
                 const weighted = combined * multiplier;
 
@@ -820,7 +883,7 @@
                 sum += weighted;
             });
 
-            // التأكد من أن مجموع النسب المئوية الكلي يساوي 100% تماماً لإظهارها بدقة للمستخدم
+            // التأكد من أن مجموع النسب المئوية الكلي يساوي 100% تماماً
             if (sum > 0) {
                 FRUITS_LIST.forEach(fruit => {
                     hybridProbs[fruit] = (hybridProbs[fruit] / sum) * 100;
@@ -833,10 +896,16 @@
 
             // تضمين معلومات المضاعفات في نص الاستراتيجية للتوضيح الفائق للمستخدم
             const multDetails = FRUITS_LIST.map(f => `${FRUIT_INFO[f].emoji}:${fruitMultipliers[f].toFixed(2)}`).join(' | ');
+            const strategyName = isTfFallback
+                ? `هجين ثنائي (انتظار تهيئة الذكاء الاصطناعي 🧠)`
+                : `مدمج ثلاثي هجين 🚀 (50% TF.js + 30% N-Gram + 20% Hot/Cold) | معاملات التكيف: [ ${multDetails} ]`;
 
             return {
                 probs: hybridProbs,
-                strategy: `مدمج هجين ذكي 🚀 (50% ذكاء اصطناعي TF.js + 50% تحليل أنماط ${ngramData.strategy.split('مع')[0]}) | معاملات التكيف: [ ${multDetails} ]`
+                tfProbs: tfProbs,
+                ngramProbs: ngramData.probs,
+                hotColdProbs: hotColdProbs,
+                strategy: strategyName
             };
         }
 
@@ -872,8 +941,9 @@
 
         // عرض وتحديث التوقعات على الواجهة (يدعم وضع التفكير الهجين والأنيميشن)
         function calculateAndDisplayPredictions(forcedData = null) {
-            // الحصول على احتمالات الدمج الهجين (الذكاء الاصطناعي + الأنماط الإحصائية)
-            const { probs, strategy } = forcedData || getHybridPredictionData();
+            // الحصول على احتمالات الدمج الهجين (الذكاء الاصطناعي + الأنماط الإحصائية + تكرار الـ 15 دورة)
+            const hybridData = forcedData || getHybridPredictionData();
+            const { probs, strategy, tfProbs, ngramProbs, hotColdProbs } = hybridData;
 
             // تحديث نص الاستراتيجية المتبع
             document.getElementById('predictionStrategyText').textContent = `استراتيجية التحليل: ${strategy}`;
@@ -900,6 +970,11 @@
                 const info = FRUIT_INFO[fruit];
                 const probVal = probs[fruit].toFixed(1);
 
+                // كتل النسب الفردية للمحركات التفصيلية
+                const tfVal = tfProbs && tfProbs[fruit] !== undefined ? tfProbs[fruit].toFixed(0) : '0';
+                const ngVal = ngramProbs && ngramProbs[fruit] !== undefined ? ngramProbs[fruit].toFixed(0) : '0';
+                const hcVal = hotColdProbs && hotColdProbs[fruit] !== undefined ? hotColdProbs[fruit].toFixed(0) : '0';
+
                 // كارد الفاكهة
                 const card = document.createElement('div');
                 card.id = `pred-card-${fruit}`;
@@ -921,6 +996,19 @@
                             <div class="h-full rounded-full transition-all duration-500 ${info.fillBg}" style="width: ${isThinkingMode ? '0' : probVal}%"></div>
                         </div>
                     </div>
+                    ${!isThinkingMode ? `
+                    <div class="text-[8px] font-bold mt-2 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1.5 gap-0.5 leading-tight select-none">
+                        <span>🧠 ذكاء: ${tfVal}%</span>
+                        <span>📊 نمط: ${ngVal}%</span>
+                        <span>🔥 تكرار: ${hcVal}%</span>
+                    </div>
+                    ` : `
+                    <div class="text-[8px] font-bold mt-2 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1.5 gap-0.5 leading-tight select-none">
+                        <span>🧠 ذكاء: ...</span>
+                        <span>📊 نمط: ...</span>
+                        <span>🔥 تكرار: ...</span>
+                    </div>
+                    `}
                 `;
 
                 grid.appendChild(card);
