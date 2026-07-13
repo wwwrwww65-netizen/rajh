@@ -954,7 +954,7 @@
         }
 
         // إضافة فاكهة جديدة
-        async function addFruitToHistory(fruit) {
+        async function addFruitToHistory(fruit, shouldAnimate = false) {
             // إيقاف وضع التفكير فوراً لتمكين الإدخال الفوري والحر دون تأخير
             stopThinkingMode();
             sounds.tap();
@@ -987,8 +987,12 @@
             // 5. تحديث الواجهات
             updateHistoryUI();
 
-            // 6. تشغيل أنيميشن التفكير والوميض الإبداعي بدلاً من حساب وعرض التوقعات فوراً
-            triggerThinkingAnimation();
+            // 6. تشغيل أنيميشن التفكير والوميض الإبداعي أو التحديث الفوري المباشر
+            if (shouldAnimate) {
+                triggerThinkingAnimation();
+            } else {
+                calculateAndDisplayPredictions();
+            }
         }
 
         // تراجع عن آخر عملية إدخال
@@ -1213,8 +1217,10 @@
                     if (isIncorrectSelectionMode) {
                         statsIncorrect++;
                         setIncorrectSelectionMode(false);
+                        addFruitToHistory(fruit, true); // يشتغل الأنيميشن عند اختيار الصح بعد الخطأ
+                    } else {
+                        addFruitToHistory(fruit, false); // لا يشتغل الأنيميشن عند الإدخال اليدوي المباشر الحر
                     }
-                    addFruitToHistory(fruit);
                 });
             });
 
@@ -1227,7 +1233,7 @@
                 setIncorrectSelectionMode(false);
 
                 statsCorrect++;
-                addFruitToHistory(lastPredictedFruit);
+                addFruitToHistory(lastPredictedFruit, true); // يشتغل الأنيميشن عند التأكيد على أنها صحيحة
             });
 
             document.getElementById('confirmIncorrectBtn').addEventListener('click', () => {
