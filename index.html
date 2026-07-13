@@ -30,6 +30,9 @@
             }
         }
     </script>
+    <!-- TensorFlow.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+
     <!-- Google Fonts: Tajawal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -173,8 +176,8 @@
                 <span>🧠 التوقع الإحصائي الذكي للدورة القادمة</span>
             </h2>
 
-            <!-- حاوية عرض الفواكه الخمسة ونسبها المئوية -->
-            <div id="predictionsGrid" class="grid grid-cols-5 gap-2.5">
+            <!-- حاوية عرض الفواكه الخمسة ونسبها المئوية مرتبة من اليسار لليمين -->
+            <div id="predictionsGrid" class="grid grid-cols-5 gap-2.5" dir="ltr">
                 <!-- سيتم ملؤها وعرضها برمجياً لضمان التحديث التفاعلي الفوري وعرض وميض ذهبي للتوقع الأكبر -->
             </div>
 
@@ -190,32 +193,32 @@
                 لوحة الإدخال السريع (لمسة واحدة فور ظهور النتيجة) ⚡
             </h3>
 
-            <!-- أزرار الإدخال الخمسة الضخمة بجانب بعضها لسهولة الضغط بالإبهام -->
-            <div class="grid grid-cols-5 gap-2" id="fastInputPad">
-                <!-- بطيخ 🍉 -->
-                <button data-fruit="بطيخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍉</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">بطيخ</span>
+            <!-- أزرار الإدخال الخمسة الضخمة بجانب بعضها لسهولة الضغط بالإبهام مرتبة من اليسار لليمين -->
+            <div class="grid grid-cols-5 gap-2" id="fastInputPad" dir="ltr">
+                <!-- تفاح 🍎 -->
+                <button data-fruit="تفاح" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-3xl mb-1 filter drop-shadow">🍎</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">تفاح</span>
                 </button>
                 <!-- موز 🍌 -->
                 <button data-fruit="موز" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
                     <span class="text-3xl mb-1 filter drop-shadow">🍌</span>
                     <span class="text-xs font-bold text-slate-700 dark:text-slate-300">موز</span>
                 </button>
-                <!-- تفاح 🍎 -->
-                <button data-fruit="تفاح" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍎</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">تفاح</span>
+                <!-- بطيخ 🍉 -->
+                <button data-fruit="بطيخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-3xl mb-1 filter drop-shadow">🍉</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">بطيخ</span>
+                </button>
+                <!-- خوخ 🍑 -->
+                <button data-fruit="خوخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-3xl mb-1 filter drop-shadow">🍑</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">خوخ</span>
                 </button>
                 <!-- مانجو 🥭 -->
                 <button data-fruit="مانجو" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
                     <span class="text-3xl mb-1 filter drop-shadow">🥭</span>
                     <span class="text-xs font-bold text-slate-700 dark:text-slate-300">مانجو</span>
-                </button>
-                <!-- خوخ/تين 🍑 -->
-                <button data-fruit="خوخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍑</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">خوخ</span>
                 </button>
             </div>
         </section>
@@ -286,7 +289,11 @@
             'خوخ': { emoji: '🍑', color: 'text-pink-400', barBg: 'bg-pink-500/20', fillBg: 'bg-pink-500', glow: 'shadow-neon-peach' }
         };
 
-        const FRUITS_LIST = ['بطيخ', 'موز', 'تفاح', 'مانجو', 'خوخ'];
+        const FRUITS_LIST = ['تفاح', 'موز', 'بطيخ', 'خوخ', 'مانجو'];
+
+        // متغيرات الحالة العامة للذكاء الاصطناعي والشبكة العصبية
+        let tfModel = null;
+        let isModelTraining = false;
 
         // متغيرات الحالة العامة
         let allRounds = [];
@@ -337,8 +344,169 @@
             clickBtn: () => playTone(600, 'sine', 0.05)
         };
 
+        // --- بناء وهندسة الشبكة العصبية باستخدام TensorFlow.js ---
+        // تحويل الفاكهة إلى ترميز One-Hot (One-Hot Encoding)
+        function fruitToOneHot(fruit) {
+            const arr = new Array(FRUITS_LIST.length).fill(0);
+            const idx = FRUITS_LIST.indexOf(fruit);
+            if (idx !== -1) arr[idx] = 1;
+            return arr;
+        }
+
+        // تحويل مصفوفة من الفواكه إلى One-Hot مفرود
+        function sequenceToFeatures(seq) {
+            let features = [];
+            seq.forEach(fruit => {
+                features = features.concat(fruitToOneHot(fruit));
+            });
+            return features;
+        }
+
+        // بناء نموذج TensorFlow.js وتدريبه من الصفر على قاعدة البيانات بالكامل
+        async function buildAndTrainModel() {
+            if (isModelTraining) return;
+            isModelTraining = true;
+            console.log("بدء تهيئة وتدريب نموذج الشبكة العصبية...");
+
+            try {
+                // إعداد البيانات: نافذة بحجم 4 فواكه كمدخلات (Input) لتوقع الفاكهة الـ 5 (Target)
+                const windowSize = 4;
+                const featuresCount = windowSize * FRUITS_LIST.length; // 4 * 5 = 20
+                const xs = [];
+                const ys = [];
+
+                // استخراج العينات من قاعدة البيانات التاريخية المتوفرة بالكامل
+                for (let i = 0; i <= allRounds.length - windowSize - 1; i++) {
+                    const inputSeq = allRounds.slice(i, i + windowSize);
+                    const targetFruit = allRounds[i + windowSize];
+
+                    xs.push(sequenceToFeatures(inputSeq));
+                    ys.push(fruitToOneHot(targetFruit));
+                }
+
+                // إذا لم يكن لدينا بيانات كافية (أمر نادر لأن الافتراضي 46 دورة)، سنقوم بالتوليد الوهمي البسيط لتجنب الأخطاء
+                if (xs.length === 0) {
+                    for (let k = 0; k < 5; k++) {
+                        const dummySeq = [FRUITS_LIST[0], FRUITS_LIST[1], FRUITS_LIST[2], FRUITS_LIST[3]];
+                        xs.push(sequenceToFeatures(dummySeq));
+                        ys.push(fruitToOneHot(FRUITS_LIST[4]));
+                    }
+                }
+
+                // تحويل البيانات لتنسيق Tensor
+                const tensorXS = tf.tensor2d(xs);
+                const tensorYS = tf.tensor2d(ys);
+
+                // بناء هيكلية الشبكة العصبية (Multi-layer Perceptron Sequential Model)
+                const model = tf.sequential();
+                // الطبقة الأولى المخفية (Dense Layer) مع تفعيل ReLU
+                model.add(tf.layers.dense({
+                    units: 16,
+                    activation: 'relu',
+                    inputShape: [featuresCount]
+                }));
+                // الطبقة الثانية المخفية لتعلم الأنماط الأكثر تعقيداً
+                model.add(tf.layers.dense({
+                    units: 10,
+                    activation: 'relu'
+                }));
+                // طبقة المخرجات (Output Layer) مع Softmax للحصول على الاحتمالات
+                model.add(tf.layers.dense({
+                    units: FRUITS_LIST.length,
+                    activation: 'softmax'
+                }));
+
+                // تجميع النموذج باستخدام Adam Optimizer وخسارة Categorical Crossentropy
+                model.compile({
+                    optimizer: tf.train.adam(0.01),
+                    loss: 'categoricalCrossentropy',
+                    metrics: ['accuracy']
+                });
+
+                // تدريب النموذج لمدة 35 حقبة (Epochs) لتحقيق التوازن المثالي بين الدقة والسرعة في المتصفح
+                await model.fit(tensorXS, tensorYS, {
+                    epochs: 35,
+                    verbose: 0 // صامت لعدم إغراق الكونسول
+                });
+
+                // تحرير التنسورات القديمة لمنع تسريب الذاكرة
+                tensorXS.dispose();
+                tensorYS.dispose();
+
+                tfModel = model;
+                console.log("تم بناء وتدريب نموذج الذكاء الاصطناعي بنجاح!");
+            } catch (e) {
+                console.error("خطأ أثناء بناء أو تدريب النموذج:", e);
+            } finally {
+                isModelTraining = false;
+            }
+        }
+
+        // التدريب التراكمي السريع والمستمر (Incremental Re-training)
+        async function trainOnNewSample(inputSeq, targetFruit) {
+            if (!tfModel || isModelTraining) return;
+            isModelTraining = true;
+            try {
+                const x = [sequenceToFeatures(inputSeq)];
+                const y = [fruitToOneHot(targetFruit)];
+
+                const tensorX = tf.tensor2d(x);
+                const tensorY = tf.tensor2d(y);
+
+                // تدريب سريع ومكثف على العينة الجديدة ليتعلم منها مباشرة وبسرعة فائقة (5 حقب)
+                await tfModel.fit(tensorX, tensorY, {
+                    epochs: 5,
+                    verbose: 0
+                });
+
+                tensorX.dispose();
+                tensorY.dispose();
+                console.log("تم التدريب التراكمي على العينة الجديدة بنجاح!");
+            } catch (e) {
+                console.warn("خطأ في التدريب التراكمي:", e);
+            } finally {
+                isModelTraining = false;
+            }
+        }
+
+        // الحصول على احتمالات التوقع من نموذج TensorFlow.js لآخر 4 فواكه في السجل
+        function getTensorFlowPredictionProbs() {
+            if (!tfModel) return null;
+
+            try {
+                let contextSeq = [];
+                if (history.length >= 4) {
+                    contextSeq = history.slice(-4);
+                } else {
+                    // في حال عدم توفر سياق كامل في السجل الحالي، نأخذ آخر فواكه من قاعدة البيانات العامة كدعم
+                    const missingCount = 4 - history.length;
+                    const defaultContext = allRounds.slice(-missingCount);
+                    contextSeq = defaultContext.concat(history);
+                }
+
+                const featureVec = sequenceToFeatures(contextSeq);
+                const inputTensor = tf.tensor2d([featureVec]);
+
+                const prediction = tfModel.predict(inputTensor);
+                const probsArray = prediction.dataSync();
+
+                inputTensor.dispose();
+                prediction.dispose();
+
+                // بناء كائن احتمالات للفاكهة
+                const probs = {};
+                FRUITS_LIST.forEach((fruit, idx) => {
+                    probs[fruit] = probsArray[idx] * 100;
+                });
+                return probs;
+            } catch (e) {
+                console.warn("خطأ في الحصول على توقع النموذج:", e);
+                return null;
+            }
+        }
+
         // --- تحميل وحفظ البيانات ---
-        function loadData() {
+        async function loadData() {
             // محاولة التحميل من LocalStorage
             const storedRounds = localStorage.getItem('fortune_all_rounds');
             if (storedRounds) {
@@ -369,6 +537,10 @@
             }
 
             updateDatabaseStatsUI();
+
+            // تهيئة وتدريب نموذج TensorFlow.js فور تحميل الصفحة
+            await buildAndTrainModel();
+
             calculateAndDisplayPredictions();
         }
 
@@ -390,7 +562,7 @@
         function getPredictionData() {
             const n = history.length;
             let matchCount = 0;
-            let freqs = { 'بطيخ': 0, 'موز': 0, 'تفاح': 0, 'مانجو': 0, 'خوخ': 0 };
+            let freqs = { 'تفاح': 0, 'موز': 0, 'بطيخ': 0, 'خوخ': 0, 'مانجو': 0 };
             let strategy = "";
 
             // وظيفة مساعدة لحساب التوزيع التكراري البسيط من مصفوفة نتائج تالية
@@ -412,7 +584,7 @@
                 if (matches.length > 0) {
                     fillFreqsFromMatches(matches);
                     matchCount = matches.length;
-                    strategy = `تطابق نمط ثلاثي (3-Gram) مع ${matchCount} سوابق`;
+                    strategy = `نمط إحصائي ثلاثي (3-Gram) مع ${matchCount} سوابق`;
                 }
             }
 
@@ -428,7 +600,7 @@
                 if (matches.length > 0) {
                     fillFreqsFromMatches(matches);
                     matchCount = matches.length;
-                    strategy = `تطابق نمط ثنائي (2-Gram) مع ${matchCount} سوابق`;
+                    strategy = `نمط إحصائي ثنائي (2-Gram) مع ${matchCount} سوابق`;
                 }
             }
 
@@ -444,7 +616,7 @@
                 if (matches.length > 0) {
                     fillFreqsFromMatches(matches);
                     matchCount = matches.length;
-                    strategy = `تطابق نمط فردي (1-Gram) مع ${matchCount} سوابق`;
+                    strategy = `نمط إحصائي فردي (1-Gram) مع ${matchCount} سوابق`;
                 }
             }
 
@@ -469,15 +641,79 @@
             return { probs, strategy };
         }
 
-        // عرض وتحديث التوقعات على الواجهة
-        function calculateAndDisplayPredictions() {
-            const { probs, strategy } = getPredictionData();
+        // دمج هجين فائق الذكاء بين نموذج TensorFlow.js والـ N-Gram الإحصائي
+        function getHybridPredictionData() {
+            // 1. حساب احتمالات الـ N-Gram
+            const ngramData = getPredictionData();
+
+            // 2. حساب احتمالات TensorFlow.js
+            const tfProbs = getTensorFlowPredictionProbs();
+
+            // إذا لم يكن نموذج TensorFlow جاهزاً بعد لأي سبب، نعتمد على الـ N-Gram بالكامل
+            if (!tfProbs) {
+                return {
+                    probs: ngramData.probs,
+                    strategy: `${ngramData.strategy} (انتظار تهيئة الذكاء الاصطناعي 🧠)`
+                };
+            }
+
+            // 3. معادلة الدمج الموزونة الذكية (50% للذكاء الاصطناعي و 50% للتحليل الإحصائي للأنماط)
+            const hybridProbs = {};
+            let sum = 0;
+
+            FRUITS_LIST.forEach(fruit => {
+                const pNgram = ngramData.probs[fruit] || 0;
+                const pTf = tfProbs[fruit] || 0;
+                // دمج ذكي بنسبة النصف لكل منهما
+                const combined = (pNgram * 0.5) + (pTf * 0.5);
+                hybridProbs[fruit] = combined;
+                sum += combined;
+            });
+
+            // التأكد من أن مجموع النسب المئوية الكلي يساوي 100% تماماً لإظهارها بدقة للمستخدم
+            if (sum > 0) {
+                FRUITS_LIST.forEach(fruit => {
+                    hybridProbs[fruit] = (hybridProbs[fruit] / sum) * 100;
+                });
+            } else {
+                FRUITS_LIST.forEach(fruit => {
+                    hybridProbs[fruit] = 20.0;
+                });
+            }
+
+            return {
+                probs: hybridProbs,
+                strategy: `مدمج هجين 🚀 (50% ذكاء اصطناعي TF.js + 50% تحليل أنماط ${ngramData.strategy.split('مع')[0]})`
+            };
+        }
+
+        // متغيرات للتحكم بوضع الأنيميشن والانتظار
+        let isThinkingMode = false;
+        let thinkingInterval = null;
+        let thinkingTimeout = null;
+
+        // مخرجات أصوات إضافية ومؤثرات صوتية تفاعلية
+        const extraSounds = {
+            tick: () => playTone(1200, 'sine', 0.03), // صوت تكتكة دوران العجلة السريعة
+            predictReveal: () => {
+                // نغمة رنانة تصاعدية جميلة للإعلان عن التوقع الجديد الفائز
+                playTone(440, 'triangle', 0.1);
+                setTimeout(() => playTone(554.37, 'triangle', 0.1), 80);
+                setTimeout(() => playTone(659.25, 'triangle', 0.15), 160);
+                setTimeout(() => playTone(880, 'sine', 0.35), 240);
+            }
+        };
+
+        // عرض وتحديث التوقعات على الواجهة (يدعم وضع التفكير الهجين والأنيميشن)
+        function calculateAndDisplayPredictions(forcedData = null) {
+            // الحصول على احتمالات الدمج الهجين (الذكاء الاصطناعي + الأنماط الإحصائية)
+            const { probs, strategy } = forcedData || getHybridPredictionData();
 
             // تحديث نص الاستراتيجية المتبع
             document.getElementById('predictionStrategyText').textContent = `استراتيجية التحليل: ${strategy}`;
 
             // تحديد الفاكهة الأعلى احتمالاً
-            let maxFruit = 'موز'; // افتراضي
+            let maxFruit = FRUITS_LIST[0];
             let maxProb = -1;
             FRUITS_LIST.forEach(f => {
                 if (probs[f] > maxProb) {
@@ -491,12 +727,13 @@
             grid.innerHTML = '';
 
             FRUITS_LIST.forEach(fruit => {
-                const isWinner = fruit === maxFruit;
+                const isWinner = fruit === maxFruit && !isThinkingMode;
                 const info = FRUIT_INFO[fruit];
                 const probVal = probs[fruit].toFixed(1);
 
                 // كارد الفاكهة
                 const card = document.createElement('div');
+                card.id = `pred-card-${fruit}`;
                 card.className = `theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 ${
                     isWinner
                         ? 'prediction-highlight-pulse bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 z-10 scale-105 shadow-neon-gold'
@@ -510,15 +747,64 @@
                         <span class="text-[10px] font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-500 dark:text-gray-400'}">${fruit}</span>
                     </div>
                     <div class="w-full mt-2 flex flex-col items-center">
-                        <span class="text-sm font-black font-mono tracking-tight text-slate-800 dark:text-white">${probVal}%</span>
+                        <span class="text-sm font-black font-mono tracking-tight text-slate-800 dark:text-white">${isThinkingMode ? '...' : probVal + '%'}</span>
                         <div class="w-full h-1 rounded-full mt-1.5 ${info.barBg}">
-                            <div class="h-full rounded-full transition-all duration-500 ${info.fillBg}" style="width: ${probVal}%"></div>
+                            <div class="h-full rounded-full transition-all duration-500 ${info.fillBg}" style="width: ${isThinkingMode ? '0' : probVal}%"></div>
                         </div>
                     </div>
                 `;
 
                 grid.appendChild(card);
             });
+        }
+
+        // تشغيل أنيميشن التفكير والوميض الدائري الفخم (مدة 3.5 ثانية)
+        function triggerThinkingAnimation() {
+            if (isThinkingMode) return;
+            isThinkingMode = true;
+
+            // إيقاف أي عداد انتظار سابق
+            if (thinkingInterval) clearInterval(thinkingInterval);
+            if (thinkingTimeout) clearTimeout(thinkingTimeout);
+
+            // تفعيل حالة التفكير وعرض النقاط المعلقة وإخفاء النسب الحقيقية مؤقتاً
+            calculateAndDisplayPredictions();
+
+            let activeIndex = 0;
+            // وميض دوران متتالي وسريع بين البطاقات الـ 5 (كل 150 ملي ثانية)
+            thinkingInterval = setInterval(() => {
+                // إزالة التوهج والتأثيرات من كافة الأزرار أولاً
+                FRUITS_LIST.forEach(fruit => {
+                    const el = document.getElementById(`pred-card-${fruit}`);
+                    if (el) {
+                        el.className = "theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 bg-slate-100/50 dark:bg-gray-800/20 border-slate-200 dark:border-gray-800/40 text-slate-600 dark:text-gray-400";
+                    }
+                });
+
+                // تطبيق التوهج على البطاقة الحالية النشطة
+                const activeFruit = FRUITS_LIST[activeIndex];
+                const activeEl = document.getElementById(`pred-card-${activeFruit}`);
+                if (activeEl) {
+                    activeEl.className = "theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 scale-105 shadow-neon-gold";
+                }
+
+                // تشغيل صوت تكتكة خفيف جداً وتفاعلي متزامن مع الحركة الدائرية
+                extraSounds.tick();
+
+                activeIndex = (activeIndex + 1) % FRUITS_LIST.length;
+            }, 150);
+
+            // إظهار النتيجة النهائية بدقة فائقة بعد 3.5 ثانية (3500 ملي ثانية)
+            thinkingTimeout = setTimeout(() => {
+                clearInterval(thinkingInterval);
+                isThinkingMode = false;
+
+                // الكشف عن النسب والتوقعات الحقيقية النهائية للذكاء الاصطناعي والمحرك الهجين
+                calculateAndDisplayPredictions();
+
+                // تشغيل صوت الرنين والاحتفال الجميل بكشف النتيجة
+                extraSounds.predictReveal();
+            }, 3500);
         }
 
 
@@ -561,22 +847,40 @@
         }
 
         // إضافة فاكهة جديدة
-        function addFruitToHistory(fruit) {
+        async function addFruitToHistory(fruit) {
+            if (isThinkingMode) return; // حماية ضد الإدخال المتكرر السريع أثناء فترة التحليل والأنيميشن
             sounds.tap();
 
-            // 1. تحديث شريط السجل (نظام طابور FIFO من 10 خانات)
+            // 1. استخراج السياق السابق (آخر 4 فواكه) قبل إضافة النتيجة الجديدة لتدريب الذكاء الاصطناعي عليها
+            let inputSeq = [];
+            if (history.length >= 4) {
+                inputSeq = history.slice(-4);
+            } else {
+                const missingCount = 4 - history.length;
+                const defaultContext = allRounds.slice(-missingCount);
+                inputSeq = defaultContext.concat(history);
+            }
+
+            // 2. تحديث شريط السجل (نظام طابور FIFO من 10 خانات)
             if (history.length >= 10) {
                 history.shift(); // حذف الأقدم
             }
             history.push(fruit);
 
-            // 2. تحديث قاعدة البيانات وحفظها محلياً
+            // 3. تحديث قاعدة البيانات وحفظها محلياً
             allRounds.push(fruit);
             saveData();
 
-            // 3. تحديث الواجهات
+            // 4. تدريب الشبكة العصبية تراكمياً (Incremental Re-training) في الخلفية على هذه العينة الجديدة فوراً
+            if (inputSeq.length === 4) {
+                await trainOnNewSample(inputSeq, fruit);
+            }
+
+            // 5. تحديث الواجهات
             updateHistoryUI();
-            calculateAndDisplayPredictions();
+
+            // 6. تشغيل تأثير التفكير والوميض والأصوات التفاعلية لكشف التوقع القادم للدورة الجديدة
+            triggerThinkingAnimation();
         }
 
         // تراجع عن آخر عملية إدخال
@@ -733,13 +1037,17 @@
             downloadAnchor.remove();
         }
 
-        function clearAllDatabase() {
+        async function clearAllDatabase() {
             sounds.undo();
             if (confirm("هل أنت متأكد من مسح كافة التعديلات والعودة لقاعدة البيانات الأصلية (46 دورة) وتصفير السجل الحالي؟")) {
                 allRounds = [...DEFAULT_DATASET];
                 history = [];
                 saveData();
                 updateHistoryUI();
+
+                // إعادة تدريب النموذج من الصفر على البيانات الافتراضية
+                await buildAndTrainModel();
+
                 calculateAndDisplayPredictions();
 
                 // إعادة تعيين العداد أيضاً ليكون جاهزاً
