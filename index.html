@@ -25,6 +25,10 @@
                         'neon-emerald': '0 0 20px rgba(16, 185, 129, 0.35)',
                         'neon-rose': '0 0 20px rgba(244, 63, 94, 0.35)',
                         'neon-purple': '0 0 25px rgba(139, 92, 246, 0.25)',
+                        'neon-orange': '0 0 20px rgba(249, 115, 22, 0.35)',
+                        'neon-amber': '0 0 20px rgba(217, 119, 6, 0.35)',
+                        'neon-blue': '0 0 20px rgba(59, 130, 246, 0.35)',
+                        'neon-cyan': '0 0 20px rgba(6, 182, 212, 0.35)'
                     }
                 }
             }
@@ -193,8 +197,8 @@
                 <span>🧠 التوقع الإحصائي الذكي للدورة القادمة</span>
             </h2>
 
-            <!-- حاوية عرض الفواكه الخمسة ونسبها المئوية مرتبة من اليسار لليمين -->
-            <div id="predictionsGrid" class="grid grid-cols-5 gap-2.5" dir="ltr">
+            <!-- حاوية عرض العناصر الثمانية ونسبها المئوية مرتبة من اليسار لليمين بتصميم شبكي (2*4) ذكي ومبهر بخصائص نيون -->
+            <div id="predictionsGrid" class="grid grid-cols-4 gap-2" dir="ltr">
                 <!-- سيتم ملؤها وعرضها برمجياً لضمان التحديث التفاعلي الفوري وعرض وميض ذهبي للتوقع الأكبر -->
             </div>
 
@@ -228,7 +232,7 @@
 
                 <!-- رسالة إرشادية عند اختيار "توقع خاطئ" -->
                 <div id="incorrectPromptBanner" class="hidden text-center text-xs font-bold text-rose-500 dark:text-rose-400 animate-pulse bg-rose-500/10 border border-rose-500/20 py-2 rounded-xl">
-                    الرجاء الضغط على الفاكهة الصحيحة الفعلية من لوحة الإدخال السريع بالأسفل 👇
+                    الرجاء الضغط على العنصر الصحيح الفعلي من لوحة الإدخال السريع بالأسفل 👇
                 </div>
             </div>
         </section>
@@ -239,45 +243,60 @@
                 لوحة الإدخال السريع (لمسة واحدة فور ظهور النتيجة) ⚡
             </h3>
 
-            <!-- أزرار الإدخال الخمسة الضخمة بجانب بعضها لسهولة الضغط بالإبهام مرتبة من اليسار لليمين -->
-            <div class="grid grid-cols-5 gap-2" id="fastInputPad" dir="ltr">
-                <!-- تفاح 🍎 -->
-                <button data-fruit="تفاح" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍎</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">تفاح</span>
+            <!-- أزرار الإدخال الثمانية الضخمة مرتبة 2*4 لسهولة الضغط بالإبهام من اليسار لليمين وبمظهر نيون جذاب متناغم -->
+            <div class="grid grid-cols-4 gap-2" id="fastInputPad" dir="ltr">
+                <!-- ذرة 🌽 -->
+                <button data-fruit="ذرة" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🌽</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">ذرة</span>
                 </button>
-                <!-- موز 🍌 -->
-                <button data-fruit="موز" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍌</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">موز</span>
+                <!-- جزر 🥕 -->
+                <button data-fruit="جزر" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🥕</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">جزر</span>
                 </button>
-                <!-- بطيخ 🍉 -->
-                <button data-fruit="بطيخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍉</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">بطيخ</span>
+                <!-- كتكوت 🐥 -->
+                <button data-fruit="كتكوت" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🐥</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">كتكوت</span>
                 </button>
-                <!-- خوخ 🍑 -->
-                <button data-fruit="خوخ" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🍑</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">خوخ</span>
+                <!-- بقرة 🐄 -->
+                <button data-fruit="بقرة" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🐄</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">بقرة</span>
                 </button>
-                <!-- مانجو 🥭 -->
-                <button data-fruit="مانجو" class="input-fruit-btn flex flex-col items-center justify-center py-3 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
-                    <span class="text-3xl mb-1 filter drop-shadow">🥭</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">مانجو</span>
+                <!-- ربيان 🍤 -->
+                <button data-fruit="ربيان" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🍤</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">ربيان</span>
+                </button>
+                <!-- طماطم 🍅 -->
+                <button data-fruit="طماطم" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🍅</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">طماطم</span>
+                </button>
+                <!-- فلفل 🫑 -->
+                <button data-fruit="فلفل" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🫑</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">فلفل</span>
+                </button>
+                <!-- سمك 🐟 -->
+                <button data-fruit="سمك" class="input-fruit-btn flex flex-col items-center justify-center py-2.5 px-1 rounded-2xl bg-slate-200 dark:bg-gray-800/60 border border-slate-300 dark:border-gray-700/50 hover:scale-105 active:scale-90 transition-all duration-100 shadow-sm">
+                    <span class="text-2xl mb-1 filter drop-shadow">🐟</span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">سمك</span>
                 </button>
             </div>
         </section>
 
     </main>
 
-    <!-- فوتر التحكم وإدارة البيانات (خيار منسدل/أكورديون لحفظ المساحة) -->
+    <!-- فوتر التحكم وإدارة البيانات -->
     <footer class="w-full max-w-lg mx-auto px-4 pb-4">
         <details class="group bg-slate-200/50 dark:bg-gray-900/40 border border-slate-200 dark:border-gray-800/60 rounded-xl overflow-hidden transition-all duration-300">
             <summary class="list-none flex justify-between items-center px-4 py-2.5 cursor-pointer text-xs font-bold text-slate-600 dark:text-gray-400 active:bg-gray-800/20">
                 <span class="flex items-center gap-1.5">
                     <span>⚙️ إدارة البيانات والتحكم العميق</span>
-                    <span id="dbRoundsCount" class="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full font-bold">46 دورة</span>
+                    <span id="dbRoundsCount" class="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full font-bold">88 دورة</span>
                 </span>
                 <span class="transition-transform group-open:rotate-180 text-purple-400">▼</span>
             </summary>
@@ -286,7 +305,7 @@
                 <!-- معلومات سريعة عن البيانات -->
                 <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-gray-400">
                     <div class="bg-slate-200 dark:bg-gray-800/40 px-2 py-1.5 rounded-lg">
-                        البيانات الإجمالية: <span id="totalDbStats" class="font-bold text-slate-800 dark:text-white font-mono">46</span>
+                        البيانات الإجمالية: <span id="totalDbStats" class="font-bold text-slate-800 dark:text-white font-mono">88</span>
                     </div>
                     <div class="bg-slate-200 dark:bg-gray-800/40 px-2 py-1.5 rounded-lg">
                         بيانات مضافة: <span id="userDbStats" class="font-bold text-purple-400 font-mono">0</span>
@@ -320,15 +339,15 @@
     <script>
         // --- البيانات والتهيئة ---
         const REFERENCE_DATASET = [
-            "بطيخ", "موز", "موز", "بطيخ", "تفاح", "بطيخ", "مانجو", "مانجو", "خوخ", "موز",
-            "بطيخ", "بطيخ", "مانجو", "خوخ", "مانجو", "خوخ", "تفاح", "خوخ", "موز", "موز",
-            "بطيخ", "موز", "مانجو", "تفاح", "تفاح", "خوخ", "تفاح", "مانجو", "تفاح", "تفاح",
-            "موز", "بطيخ", "بطيخ", "موز", "مانجو", "مانجو", "بطيخ", "خوخ", "خوخ", "تفاح",
-            "موز", "خوخ", "مانجو", "موز", "موز", "تفاح", "تفاح", "مانجو", "مانجو", "تفاح",
-            "تفاح", "مانجو", "بطيخ", "مانجو", "موز", "موز", "تفاح", "تفاح", "خوخ", "مانجو",
-            "بطيخ", "موز", "موز", "تفاح", "تفاح", "بطيخ", "بطيخ", "موز", "موز", "موز",
-            "تفاح", "مانجو", "خوخ", "موز", "مانجو", "خوخ", "تفاح", "موز", "موز", "تفاح",
-            "مانجو", "مانجو", "تفاح", "مانجو", "خوخ", "خوخ", "خوخ", "بطيخ"
+            "سمك", "ذرة", "بقرة", "فلفل", "فلفل", "فلفل", "فلفل", "كتكوت", "جزر", "طماطم",
+            "ربيان", "ربيان", "ربيان", "بقرة", "ذرة", "ذرة", "جزر", "جزر", "طماطم", "طماطم",
+            "كتكوت", "سمك", "سمك", "سمك", "بقرة", "بقرة", "كتكوت", "كتكوت", "ربيان", "ربيان",
+            "جزر", "طماطم", "ذرة", "ذرة", "فلفل", "سمك", "كتكوت", "كتكوت", "جزر", "طماطم",
+            "طماطم", "بقرة", "ذرة", "فلفل", "بقرة", "جزر", "ربيان", "ربيان", "ربيان", "سمك",
+            "سمك", "طماطم", "جزر", "فلفل", "بقرة", "ذرة", "ذرة", "كتكوت", "كتكوت", "فلفل",
+            "طماطم", "بقرة", "سمك", "جزر", "ربيان", "سمك", "كتكوت", "فلفل", "ذرة", "طماطم",
+            "بقرة", "جزر", "كتكوت", "ذرة", "فلفل", "بقرة", "ربيان", "جزر", "طماطم", "سمك",
+            "ذرة", "طماطم", "فلفل", "ربيان", "جزر", "جزر", "كتكوت", "بقرة"
         ];
 
         const DEFAULT_DATASET = [...REFERENCE_DATASET];
@@ -343,14 +362,17 @@
         }
 
         const FRUIT_INFO = {
-            'بطيخ': { emoji: '🍉', color: 'text-emerald-400', barBg: 'bg-emerald-500/20', fillBg: 'bg-emerald-500', glow: 'shadow-neon-emerald' },
-            'موز': { emoji: '🍌', color: 'text-yellow-400', barBg: 'bg-yellow-500/20', fillBg: 'bg-yellow-500', glow: 'shadow-neon-gold' },
-            'تفاح': { emoji: '🍎', color: 'text-rose-400', barBg: 'bg-rose-500/20', fillBg: 'bg-rose-500', glow: 'shadow-neon-rose' },
-            'مانجو': { emoji: '🥭', color: 'text-orange-400', barBg: 'bg-orange-500/20', fillBg: 'bg-orange-500', glow: 'shadow-neon-orange' },
-            'خوخ': { emoji: '🍑', color: 'text-pink-400', barBg: 'bg-pink-500/20', fillBg: 'bg-pink-500', glow: 'shadow-neon-peach' }
+            'ذرة': { emoji: '🌽', color: 'text-yellow-400', barBg: 'bg-yellow-500/20', fillBg: 'bg-yellow-500', glow: 'shadow-neon-gold' },
+            'جزر': { emoji: '🥕', color: 'text-orange-400', barBg: 'bg-orange-500/20', fillBg: 'bg-orange-500', glow: 'shadow-neon-orange' },
+            'كتكوت': { emoji: '🐥', color: 'text-amber-400', barBg: 'bg-amber-500/20', fillBg: 'bg-amber-500', glow: 'shadow-neon-amber' },
+            'بقرة': { emoji: '🐄', color: 'text-slate-400', barBg: 'bg-slate-500/20', fillBg: 'bg-slate-500', glow: 'shadow-neon-purple' },
+            'ربيان': { emoji: '🍤', color: 'text-rose-400', barBg: 'bg-rose-500/20', fillBg: 'bg-rose-500', glow: 'shadow-neon-rose' },
+            'طماطم': { emoji: '🍅', color: 'text-red-500', barBg: 'bg-red-500/20', fillBg: 'bg-red-500', glow: 'shadow-neon-rose' },
+            'فلفل': { emoji: '🫑', color: 'text-emerald-400', barBg: 'bg-emerald-500/20', fillBg: 'bg-emerald-500', glow: 'shadow-neon-emerald' },
+            'سمك': { emoji: '🐟', color: 'text-blue-400', barBg: 'bg-blue-500/20', fillBg: 'bg-blue-500', glow: 'shadow-neon-blue' }
         };
 
-        const FRUITS_LIST = ['تفاح', 'موز', 'بطيخ', 'خوخ', 'مانجو'];
+        const FRUITS_LIST = ['ذرة', 'جزر', 'كتكوت', 'بقرة', 'ربيان', 'طماطم', 'فلفل', 'سمك'];
 
         // متغيرات الحالة العامة للذكاء الاصطناعي والشبكة العصبية
         let tfModel = null;
@@ -440,7 +462,7 @@
             try {
                 // إعداد البيانات: نافذة بحجم MODEL_WINDOW_SIZE فواكه كمدخلات لتوقع الفاكهة التالية
                 const windowSize = MODEL_WINDOW_SIZE;
-                const featuresCount = windowSize * FRUITS_LIST.length; // 2 * 5 = 10
+                const featuresCount = windowSize * FRUITS_LIST.length; // 2 * 8 = 16
                 const xs = [];
                 const ys = [];
 
@@ -456,7 +478,7 @@
 
                 // إذا لم يكن لدينا بيانات كافية، سنقوم بالتوليد الوهمي البسيط لتجنب الأخطاء
                 if (xs.length === 0) {
-                    for (let k = 0; k < 5; k++) {
+                    for (let k = 0; k < 8; k++) {
                         const dummySeq = [FRUITS_LIST[0], FRUITS_LIST[1]];
                         xs.push(sequenceToFeatures(dummySeq));
                         ys.push(fruitToOneHot(FRUITS_LIST[4]));
@@ -471,13 +493,13 @@
                 const model = tf.sequential();
                 // الطبقة الأولى المخفية (Dense Layer) مع تفعيل ReLU
                 model.add(tf.layers.dense({
-                    units: 16,
+                    units: 24,
                     activation: 'relu',
                     inputShape: [featuresCount]
                 }));
                 // الطبقة الثانية المخفية لتعلم الأنماط الأكثر تعقيداً
                 model.add(tf.layers.dense({
-                    units: 10,
+                    units: 16,
                     activation: 'relu'
                 }));
                 // طبقة المخرجات (Output Layer) مع Softmax للحصول على الاحتمالات
@@ -668,7 +690,22 @@
                             "النتيجة": "صحيحة"
                         };
                     }
-                    return r;
+                    // التحقق من توافق الفواكه القديمة وتحويلها لكي لا تفشل التوقعات
+                    let actual = r["الفاكهة_الفعلية"];
+                    let expected = r["الفاكهة_المتوقعة"];
+                    if (!FRUITS_LIST.includes(actual)) {
+                        migrated = true;
+                        actual = FRUITS_LIST[Math.floor(Math.random() * FRUITS_LIST.length)];
+                    }
+                    if (!FRUITS_LIST.includes(expected)) {
+                        migrated = true;
+                        expected = actual;
+                    }
+                    return {
+                        "الفاكهة_الفعلية": actual,
+                        "الفاكهة_المتوقعة": expected,
+                        "النتيجة": r["النتيجة"] || "صحيحة"
+                    };
                 });
                 if (migrated) {
                     saveData();
@@ -772,7 +809,7 @@
             const dataset = getPredictionDataset();
             const n = history.length;
             let matchCount = 0;
-            let freqs = { 'تفاح': 0, 'موز': 0, 'بطيخ': 0, 'خوخ': 0, 'مانجو': 0 };
+            let freqs = { 'ذرة': 0, 'جزر': 0, 'كتكوت': 0, 'بقرة': 0, 'ربيان': 0, 'طماطم': 0, 'فلفل': 0, 'سمك': 0 };
             let strategy = "";
 
             // وظيفة مساعدة لحساب التوزيع التكراري البسيط من مصفوفة نتائج تالية
@@ -845,7 +882,7 @@
 
             let probs = {};
             FRUITS_LIST.forEach(f => {
-                probs[f] = totalWeight > 0 ? (freqs[f] / totalWeight) * 100 : 20.0;
+                probs[f] = totalWeight > 0 ? (freqs[f] / totalWeight) * 100 : 12.5;
             });
 
             return { probs, strategy };
@@ -856,7 +893,7 @@
             const dataset = getPredictionDataset();
             const recent15 = dataset.slice(-15);
 
-            const counts = { 'تفاح': 0, 'موز': 0, 'بطيخ': 0, 'خوخ': 0, 'مانجو': 0 };
+            const counts = { 'ذرة': 0, 'جزر': 0, 'كتكوت': 0, 'بقرة': 0, 'ربيان': 0, 'طماطم': 0, 'فلفل': 0, 'سمك': 0 };
             recent15.forEach(fruit => {
                 if (counts[fruit] !== undefined) {
                     counts[fruit]++;
@@ -873,7 +910,7 @@
 
         // حساب مضاعفات الأداء التكيفية وسلسلة التكرار (Streak/Momentum Boost) ديناميكياً
         function calculateFruitMultipliers() {
-            const multipliers = { 'تفاح': 1.0, 'موز': 1.0, 'بطيخ': 1.0, 'خوخ': 1.0, 'مانجو': 1.0 };
+            const multipliers = { 'ذرة': 1.0, 'جزر': 1.0, 'كتكوت': 1.0, 'بقرة': 1.0, 'ربيان': 1.0, 'طماطم': 1.0, 'فلفل': 1.0, 'سمك': 1.0 };
 
             // دراسة آخر 40 دورة للتكيف والتعلم من النجاحات والأخطاء
             const recentRounds = allRounds.slice(-40);
@@ -885,14 +922,18 @@
                 const predicted = round["الفاكهة_المتوقعة"];
                 const result = round["النتيجة"];
 
-                if (result === "صحيحة") {
-                    // مكافأة التوقع الصحيح لترتفع فرصته مستقبلاً
-                    multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
-                } else if (result === "خاطئة") {
-                    // عقوبة طفيفة جداً لمنع الانهيار السريع في التوقعات (مراعاة للتكرار)
-                    multipliers[predicted] = Math.max(multipliers[predicted] - 0.05, 0.60);
-                    // مكافأة الفاكهة الصحيحة الفعلية لرفع مرتبتها
-                    multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
+                if (FRUITS_LIST.includes(actual)) {
+                    if (result === "صحيحة") {
+                        // مكافأة التوقع الصحيح لترتفع فرصته مستقبلاً
+                        multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
+                    } else if (result === "خاطئة") {
+                        // عقوبة طفيفة جداً لمنع الانهيار السريع في التوقعات (مراعاة للتكرار)
+                        if (predicted && FRUITS_LIST.includes(predicted)) {
+                            multipliers[predicted] = Math.max(multipliers[predicted] - 0.05, 0.60);
+                        }
+                        // مكافأة الفاكهة الصحيحة الفعلية لرفع مرتبتها
+                        multipliers[actual] = Math.min(multipliers[actual] + 0.15, 3.0);
+                    }
                 }
             });
 
@@ -911,7 +952,6 @@
                 }
 
                 // رفع احتمالية تكرار الفاكهة التي ظهرت للتو مباشرة بناءً على طول السلسلة
-                // سلسلة طولها 1 تمنح زيادة قدرها +50%، سلسلة طولها 2 تمنح +100%، وسلسلة طولها 3+ تمنح +150%
                 let streakBoost = 1.0;
                 if (streakLength === 1) {
                     streakBoost = 1.50;
@@ -921,7 +961,9 @@
                     streakBoost = 2.50;
                 }
 
-                multipliers[lastFruit] *= streakBoost;
+                if (multipliers[lastFruit] !== undefined) {
+                    multipliers[lastFruit] *= streakBoost;
+                }
             }
 
             return multipliers;
@@ -939,7 +981,7 @@
                 isTfFallback = true;
                 tfProbs = {};
                 FRUITS_LIST.forEach(fruit => {
-                    tfProbs[fruit] = ngramData.probs[fruit] || 20.0;
+                    tfProbs[fruit] = ngramData.probs[fruit] || 12.5;
                 });
             }
 
@@ -976,7 +1018,7 @@
                 });
             } else {
                 FRUITS_LIST.forEach(fruit => {
-                    hybridProbs[fruit] = 20.0;
+                    hybridProbs[fruit] = 12.5;
                 });
             }
 
@@ -1064,32 +1106,32 @@
                 // كارد الفاكهة
                 const card = document.createElement('div');
                 card.id = `pred-card-${fruit}`;
-                card.className = `theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 ${
+                card.className = `theme-transition flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all duration-300 ${
                     isWinner
-                        ? 'prediction-highlight-pulse bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 z-10 scale-105 shadow-neon-gold'
+                        ? 'prediction-highlight-pulse bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 z-10 scale-105 ' + info.glow
                         : 'bg-slate-100/50 dark:bg-gray-800/20 border-slate-200 dark:border-gray-800/40 text-slate-600 dark:text-gray-400'
                 }`;
 
                 card.innerHTML = `
                     <div class="relative flex flex-col items-center">
                         ${isWinner ? '<span class="absolute -top-3.5 bg-yellow-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-md">الأعلى</span>' : ''}
-                        <span class="text-3xl filter drop-shadow my-1 select-none">${info.emoji}</span>
-                        <span class="text-[10px] font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-500 dark:text-gray-400'}">${fruit}</span>
+                        <span class="text-2xl filter drop-shadow my-0.5 select-none">${info.emoji}</span>
+                        <span class="text-[9px] font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-500 dark:text-gray-400'}">${fruit}</span>
                     </div>
-                    <div class="w-full mt-2 flex flex-col items-center">
-                        <span class="text-sm font-black font-mono tracking-tight text-slate-800 dark:text-white">${isThinkingMode ? '...' : probVal + '%'}</span>
-                        <div class="w-full h-1 rounded-full mt-1.5 ${info.barBg}">
+                    <div class="w-full mt-1.5 flex flex-col items-center">
+                        <span class="text-xs font-black font-mono tracking-tight text-slate-800 dark:text-white">${isThinkingMode ? '...' : probVal + '%'}</span>
+                        <div class="w-full h-1 rounded-full mt-1 ${info.barBg}">
                             <div class="h-full rounded-full transition-all duration-500 ${info.fillBg}" style="width: ${isThinkingMode ? '0' : probVal}%"></div>
                         </div>
                     </div>
                     ${!isThinkingMode ? `
-                    <div class="text-[8px] font-bold mt-2 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1.5 gap-0.5 leading-tight select-none">
+                    <div class="text-[7.5px] font-bold mt-1.5 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1 gap-0.5 leading-tight select-none">
                         <span>🧠 ذكاء: ${tfVal}%</span>
                         <span>📊 نمط: ${ngVal}%</span>
                         <span>🔥 تكرار: ${hcVal}%</span>
                     </div>
                     ` : `
-                    <div class="text-[8px] font-bold mt-2 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1.5 gap-0.5 leading-tight select-none">
+                    <div class="text-[7.5px] font-bold mt-1.5 text-slate-400 dark:text-gray-500 flex flex-col items-center border-t border-slate-200/40 dark:border-gray-800/40 w-full pt-1 gap-0.5 leading-tight select-none">
                         <span>🧠 ذكاء: ...</span>
                         <span>📊 نمط: ...</span>
                         <span>🔥 تكرار: ...</span>
@@ -1114,13 +1156,13 @@
             calculateAndDisplayPredictions();
 
             let activeIndex = 0;
-            // وميض دوران متتالي وسريع بين البطاقات الـ 5 (كل 150 ملي ثانية)
+            // وميض دوران متتالي وسريع بين البطاقات الـ 8 (كل 150 ملي ثانية)
             thinkingInterval = setInterval(() => {
                 // إزالة التوهج والتأثيرات من كافة الأزرار أولاً
                 FRUITS_LIST.forEach(fruit => {
                     const el = document.getElementById(`pred-card-${fruit}`);
                     if (el) {
-                        el.className = "theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 bg-slate-100/50 dark:bg-gray-800/20 border-slate-200 dark:border-gray-800/40 text-slate-600 dark:text-gray-400";
+                        el.className = "theme-transition flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all duration-300 bg-slate-100/50 dark:bg-gray-800/20 border-slate-200 dark:border-gray-800/40 text-slate-600 dark:text-gray-400";
                     }
                 });
 
@@ -1128,7 +1170,8 @@
                 const activeFruit = FRUITS_LIST[activeIndex];
                 const activeEl = document.getElementById(`pred-card-${activeFruit}`);
                 if (activeEl) {
-                    activeEl.className = "theme-transition flex flex-col items-center justify-between p-3 rounded-2xl border transition-all duration-300 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 scale-105 shadow-neon-gold";
+                    const info = FRUIT_INFO[activeFruit];
+                    activeEl.className = "theme-transition flex flex-col items-center justify-between p-2.5 rounded-2xl border transition-all duration-300 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-400 text-yellow-400 scale-105 " + info.glow;
                 }
 
                 // تشغيل صوت تكتكة خفيف جداً وتفاعلي متزامن مع الحركة الدائرية
